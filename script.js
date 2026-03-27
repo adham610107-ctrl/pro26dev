@@ -5,13 +5,12 @@ let currentIndex = 0;
 let currentUser = null;
 let timerInterval;
 
-// Setup Variables
+// Parametrlar
 let pendingSubject = null;
 let pendingPool = [];
-let diffTime = 900; // default 15m
-let orderMode = 'random'; // random or sequential
+let diffTime = 900; 
+let orderMode = 'random'; 
 
-// Data Initialization
 async function loadData() {
     const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
     let globalIndex = 0;
@@ -22,18 +21,19 @@ async function loadData() {
             const subject = f.split('.')[0];
             
             data.forEach((q) => {
-                // XATOLIK 1: Dublikatlarni tozalash va 3 talik bo'lsa 4-variant qo'shish
-                let rawOpts = q.options.filter(o => o.trim() !== ''); // Bo'shlarni olib tashlash
-                let uniqueOpts = [...new Set(rawOpts)]; // Dublikatlarni olib tashlash
+                // 1. Dublikatlarni tozalash (Bo'sh joylarni kesish)
+                let rawOpts = q.options.filter(o => o !== null && o.toString().trim() !== ''); 
+                let uniqueOpts = [...new Set(rawOpts)]; 
                 
-                let ansText = q.options[q.answer]; // Asl javob matni
+                let correctText = q.options[q.answer]; // Asl javob
                 
+                // 2. Agar 3 ta qolsa, 4-variantni qo'shish
                 if (uniqueOpts.length === 3) {
                     uniqueOpts.push("Barcha javoblar to'g'ri");
                 }
                 
-                let newAnsIdx = uniqueOpts.indexOf(ansText);
-                if (newAnsIdx === -1) newAnsIdx = 0; // fallback
+                let newAnsIdx = uniqueOpts.indexOf(correctText);
+                if (newAnsIdx === -1) newAnsIdx = 0; 
 
                 bank.push({ ...q, id: `q_${globalIndex}`, subject, options: uniqueOpts, answer: newAnsIdx });
                 globalIndex++;
@@ -47,7 +47,6 @@ window.onload = async () => {
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 };
 
-// Login & Stats
 function handleLogin() {
     const name = document.getElementById('student-name').value.trim();
     if (name.length < 3) return alert("Ism kiriting!");
@@ -64,18 +63,17 @@ function handleLogin() {
 function updateStats() {
     const userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
     
-    // XATOLIK 2: 800 tadan aniq nechtasi o'zlashtirildi/xato qilindi (unique set)
+    // 3. 800 tadan aniq unikal o'zlashtirish va xatolar hisobi
     let uniqueLearned = [...new Set(userDb.learned)].length;
     let uniqueErrors = [...new Set(userDb.errors)].length;
 
     document.getElementById('learned-count').innerText = uniqueLearned;
     document.getElementById('error-count').innerText = uniqueErrors;
     
-    // XATOLIK 3: Xatolar ustida ishlash tugmasi
+    // 4. Xatolar tugmasini yoqish/o'chirish
     document.getElementById('error-work-btn').disabled = uniqueErrors === 0;
 }
 
-// Bo'limlar (Chapters) va Indikatorlar
 function toggleChapters() {
     const grid = document.getElementById('chapters-grid');
     grid.classList.toggle('hidden');
@@ -92,7 +90,6 @@ function renderChapterGrid() {
         let end = start + 20;
         let chunk = bank.slice(start, end);
         
-        // Bu 20 talik ichida nechta savol o'rganilganligini hisoblash
         let learnedInChunk = chunk.filter(q => userDb.learned.includes(q.id)).length;
         
         let btn = document.createElement('button');
@@ -104,18 +101,17 @@ function renderChapterGrid() {
     }
 }
 
-// SETUP SCREEN (YANGILIK: Qiyinlik va Ketma-ketlik)
+// SETUP: Parametrlarni o'rnatish
 function openSetup(type) {
     const userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
     
     if (type === 'errors') {
-        // XATOLIK 4: Faqat xato qilingan savollarni olish
         pendingPool = bank.filter(q => userDb.errors.includes(q.id));
         if (pendingPool.length === 0) return alert("Xatolar topilmadi!");
     } else {
         let pool = type === 'mixed' ? bank : bank.filter(q => q.subject === type);
         let unlearned = pool.filter(q => !userDb.learned.includes(q.id));
-        pendingPool = unlearned.length >= 20 ? unlearned : pool; // Agar hammasi yechilgan bo'lsa, qayta hamma bazani beradi
+        pendingPool = unlearned.length >= 20 ? unlearned : pool; 
     }
     
     pendingSubject = type;
@@ -126,7 +122,6 @@ function showSetup() {
     document.getElementById('dashboard-screen').classList.replace('active', 'hidden');
     document.getElementById('setup-screen').classList.replace('hidden', 'active');
     
-    // Agar bo'lim (chapter) tanlangan bo'lsa, "Ketma-ketlik"ni default qilish
     if (pendingSubject === 'sequential') {
         setOrder('sequential', document.querySelector('.order-seq'));
     } else {
@@ -139,13 +134,12 @@ function cancelSetup() {
     document.getElementById('dashboard-screen').classList.replace('hidden', 'active');
 }
 
-// Segmented Controls
 function setDifficulty(level, btn) {
     document.querySelectorAll('.difficulty-control .seg-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if(level === 'easy') diffTime = 1200; // 20m
-    if(level === 'medium') diffTime = 900; // 15m
-    if(level === 'hard') diffTime = 600; // 10m
+    if(level === 'easy') diffTime = 1200; // 20 min
+    if(level === 'medium') diffTime = 900; // 15 min
+    if(level === 'hard') diffTime = 600; // 10 min
 }
 
 function setOrder(mode, btn) {
@@ -154,18 +148,18 @@ function setOrder(mode, btn) {
     orderMode = mode;
 }
 
-// TESTNI BOSHLASH
+// BOSHLASH
 function confirmSetupAndStart() {
     let selected20 = [];
     
-    // Ketma-ketlik yoki Random qoidasi (FAQAT SAVOLLAR UCHUN)
+    // 5. Faqat savollar tartibi random/ketma-ket bo'ladi
     if (orderMode === 'random') {
         selected20 = shuffleArray([...pendingPool]).slice(0, 20);
     } else {
-        selected20 = pendingPool.slice(0, 20); // Kesib olamiz, aralashtirmaymiz
+        selected20 = pendingPool.slice(0, 20); 
     }
 
-    // VARIANTLAR (A,B,C,D) HAR DOIM ARALASHTIRILADI
+    // 6. Javob Variantlari HAR DOIM RANDOM!
     currentTest = selected20.map(q => {
         let correctText = q.options[q.answer];
         let shuffledOpts = shuffleArray([...q.options]);
@@ -200,7 +194,6 @@ function startTimer(seconds) {
     }, 1000);
 }
 
-// UI Rendering
 function renderQuestion() {
     const q = currentTest[currentIndex];
     const area = document.getElementById('question-area');
@@ -222,37 +215,37 @@ function checkAns(idx) {
     const isCorrect = idx === currentTest[currentIndex].answer;
     userAnswers[currentIndex] = { selected: idx, isCorrect };
     
-    // Shaxsiy Xotiraga Yozish (Mukammal mantiq)
     let userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
     const qId = currentTest[currentIndex].id;
     
     if (isCorrect) {
         if (!userDb.learned.includes(qId)) userDb.learned.push(qId);
-        // Agar to'g'ri topsa, xatolar ro'yxatidan o'chirib yuborish
         userDb.errors = userDb.errors.filter(id => id !== qId); 
     } else {
         if (!userDb.errors.includes(qId)) userDb.errors.push(qId);
     }
     localStorage.setItem(`stats_${currentUser}`, JSON.stringify(userDb));
 
-    renderQuestion(); // Ranglarni qo'llash
+    renderQuestion(); 
     
     if (userAnswers.filter(a => a !== null).length === currentTest.length) {
         document.getElementById('finish-btn').classList.remove('hidden');
     }
 
-    // Auto-next
     setTimeout(() => { let next = userAnswers.findIndex(ans => ans === null); if (next !== -1) { currentIndex = next; renderQuestion(); } }, 500);
 }
 
+// 7. TO'G'RI JAVOB YASHIRIN QOLADI! Faqat foydalanuvchi tanlagani tekshiriladi.
 function getBtnClass(i) {
     if (!userAnswers[currentIndex]) return '';
-    if (i === currentTest[currentIndex].answer) return 'correct-ans'; // FAQAT TO'G'RINI YASHIL QILISH: Bu safar ko'rsatamiz. Agar ko'rsatmaslik kerak bo'lsa shartni o'zgartiramiz.
-    if (userAnswers[currentIndex].selected === i && !userAnswers[currentIndex].isCorrect) return 'wrong-ans';
-    return '';
+    const ans = userAnswers[currentIndex];
+    
+    if (ans.selected === i) {
+        return ans.isCorrect ? 'correct-ans' : 'wrong-ans';
+    }
+    return ''; // To'g'ri bo'lsa ham unga class bermaymiz!
 }
 
-// 100% SHART
 function finishExam() {
     clearInterval(timerInterval);
     const correct = userAnswers.filter(a => a?.isCorrect).length;
@@ -260,7 +253,6 @@ function finishExam() {
     if (correct < currentTest.length) {
         alert(`Natija: ${correct}/${currentTest.length}. Qoidaga ko'ra, 100% bo'lmaguncha ushbu savollar aralashtirib qayta beriladi.`);
         
-        // O'sha testlarni qayta berish
         currentTest = shuffleArray(currentTest).map(q => {
             let correctText = q.options[q.answer];
             let shuffledOpts = shuffleArray([...q.options]);
@@ -278,7 +270,6 @@ function finishExam() {
     }
 }
 
-// Animatsiya
 function triggerWin() {
     document.getElementById('question-area').classList.add('gravity-fall');
     confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
@@ -288,7 +279,6 @@ function triggerWin() {
     }, 2000);
 }
 
-// Map va Yordamchilar
 function renderMap() {
     const map = document.getElementById('indicator-map');
     map.innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}" onclick="goTo(${i})">${i+1}</div>`).join('');
