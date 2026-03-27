@@ -17,7 +17,7 @@
         <div class="nav-right">
             <button id="exit-test-btn" class="exit-mini hidden" onclick="exitTest()">🚪 Chiqish</button>
             <div id="exam-timer" class="timer-badge hidden">15:00</div>
-            <button onclick="toggleTheme()" class="theme-btn">🌙</button>
+            <button onclick="toggleTheme()" class="theme-btn" title="Tungi rejim">🌙</button>
         </div>
     </nav>
 
@@ -56,7 +56,7 @@
 
     <div id="dashboard-screen" class="screen hidden">
         <div class="container main-content">
-            <header class="dash-header">
+            <header class="dash-header slide-up">
                 <h2>Salom, <span id="display-name" class="text-primary">Talaba</span>!</h2>
                 <div class="stats-row">
                     <div class="stat-card">O'zlashtirildi: <b id="learned-count" class="text-success">0</b> <span class="max-total">/ 800</span></div>
@@ -64,7 +64,7 @@
                 </div>
             </header>
 
-            <div class="category-grid">
+            <div class="category-grid slide-up">
                 <button class="cat-btn" onclick="openSetup('musiqa_nazariyasi')">🎼 Musiqa nazariyasi</button>
                 <button class="cat-btn" onclick="openSetup('cholgu_ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
                 <button class="cat-btn" onclick="openSetup('vokal_ijrochiligi')">🎤 Vokal ijrochiligi</button>
@@ -116,13 +116,14 @@
         
         <div class="container test-layout">
             <div class="map-container">
+                <div class="map-title only-pc">Savollar xaritasi</div>
                 <div id="indicator-map" class="mini-map"></div>
             </div>
 
             <div class="question-container">
                 <div id="question-list-wrapper" class="q-list-wrapper">
                     <div id="all-questions-area"></div>
-                    <div style="height: 40vh;"></div> </div>
+                    <div class="scroll-pad"></div> </div>
                 
                 <div class="nav-controls">
                     <button class="nav-btn" onclick="move(-1)">⬅️ Oldingi</button>
