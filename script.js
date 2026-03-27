@@ -28,7 +28,7 @@ async function loadData() {
                 
                 let correctText = q.options[q.answer]; 
                 
-                // 2. Agar aynan 3 ta variant bo'lsa, 4-ni qo'shish
+                // 2. 3 ta variant bo'lsa, 4-ni qo'shish
                 if (uniqueOpts.length === 3) {
                     uniqueOpts.push("Barcha javoblar to'g'ri");
                 }
@@ -64,7 +64,7 @@ function handleLogin() {
 function updateStats() {
     let userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
     
-    // 800 talik unikal hisob (dublikatsiz)
+    // 800 talik unikal hisob
     userDb.learned = [...new Set(userDb.learned)];
     userDb.errors = [...new Set(userDb.errors)];
     localStorage.setItem(`stats_${currentUser}`, JSON.stringify(userDb));
@@ -72,7 +72,7 @@ function updateStats() {
     document.getElementById('learned-count').innerText = userDb.learned.length;
     document.getElementById('error-count').innerText = userDb.errors.length;
     
-    // 7-tugmani aktivlashtirish
+    // 7-tugmani faollashtirish (Faqat xato bo'lsa)
     document.getElementById('error-work-btn').disabled = userDb.errors.length === 0;
 }
 
@@ -177,7 +177,7 @@ function initTestUI() {
     clearInterval(timerInterval);
     startTimer(diffTime);
     renderMap();
-    renderAllQuestions(); // Barcha 20 ta savolni ekranga chizish
+    renderAllQuestions(); 
 }
 
 function startTimer(seconds) {
@@ -190,7 +190,7 @@ function startTimer(seconds) {
     }, 1000);
 }
 
-// 🌟 BARCHA SAVOLLARNI CHIZISH VA BLUR EFFEKT LOGIKASI
+// 🌟 BARCHA 20 SAVOLNI CHIZISH VA BLUR QILISH
 function renderAllQuestions() {
     const area = document.getElementById('all-questions-area');
     area.innerHTML = currentTest.map((q, idx) => `
@@ -212,7 +212,6 @@ function renderAllQuestions() {
 }
 
 function updateFocus() {
-    // Blur va active classlarini yangilash
     for(let i = 0; i < currentTest.length; i++) {
         const block = document.getElementById(`q-block-${i}`);
         if(block) {
@@ -232,13 +231,13 @@ function updateFocus() {
 function scrollToActive() {
     const activeBlock = document.getElementById(`q-block-${currentIndex}`);
     if (activeBlock) {
+        // PC va Mobile uchun moslashuvchan scroll
         activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
-// 🌟 MAGIC JAVOB TEKSHIRISH VA YASHIRIN JAVOB
+// 🌟 MAGIC ANIMATION & HIDDEN CORRECT ANSWER
 function checkAns(qIdx, optIdx) {
-    // Agar biz joriy savolda bo'lmasak yoki javob berib bo'lingan bo'lsa
     if (qIdx !== currentIndex || userAnswers[qIdx]) return;
     
     const isCorrect = optIdx === currentTest[qIdx].answer;
@@ -253,19 +252,19 @@ function checkAns(qIdx, optIdx) {
         if (!userDb.learned.includes(qId)) userDb.learned.push(qId);
         userDb.errors = userDb.errors.filter(id => id !== qId); 
         
-        // 🎇 To'g'ri bo'lsa Magic Yashil Animatsiya
+        // To'g'ri: Magic Glow
         clickedBtn.classList.add('magic-correct');
     } else {
         if (!userDb.errors.includes(qId)) userDb.errors.push(qId);
         
-        // 🎇 Xato bo'lsa Magic Qizil Animatsiya
+        // Xato: Magic Shake & Red
         clickedBtn.classList.add('magic-wrong');
-        // DIQQAT: To'g'ri javobga hech qanday klass qo'shilmaydi (Sir tutiladi).
+        // TO'G'RI JAVOB YASHIRIN QOLADI.
     }
     
     localStorage.setItem(`stats_${currentUser}`, JSON.stringify(userDb));
     
-    // Barcha tugmalarni blocklash (shu savol uchun)
+    // Bloklash
     const options = document.getElementById(`opts-${qIdx}`).getElementsByTagName('button');
     for(let btn of options) btn.disabled = true;
 
@@ -273,7 +272,7 @@ function checkAns(qIdx, optIdx) {
         document.getElementById('finish-btn').classList.remove('hidden');
     }
 
-    // Keyingi savolga silliq o'tish
+    // Auto Next
     setTimeout(() => { 
         let next = userAnswers.findIndex(ans => ans === null); 
         if (next !== -1) { 
@@ -327,9 +326,11 @@ function updateMap() {
     
     currentTest.forEach((_, i) => {
         const dot = document.getElementById(`dot-${i}`);
-        dot.className = 'dot';
-        if (i === currentIndex) dot.classList.add('active-dot');
-        if (userAnswers[i]) dot.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong');
+        if(dot) {
+            dot.className = 'dot';
+            if (i === currentIndex) dot.classList.add('active-dot');
+            if (userAnswers[i]) dot.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong');
+        }
     });
 }
 
