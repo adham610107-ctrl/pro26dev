@@ -1,9 +1,9 @@
 :root {
-    --primary: #007AFF; /* iOS Blue */
-    --accent: #5E5CE6; /* iOS Indigo */
-    --success: #34C759; /* iOS Green */
-    --warning: #FFCC00; /* iOS Yellow */
-    --error: #FF3B30; /* iOS Red */
+    --primary: #007AFF; 
+    --accent: #5E5CE6; 
+    --success: #34C759; 
+    --warning: #FF9500; 
+    --error: #FF3B30; 
     --bg: #F2F2F7;
     --card: #FFFFFF;
     --text: #1C1C1E;
@@ -25,15 +25,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .screen { flex-grow: 1; display: flex; flex-direction: column; }
 .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
-/* Typography & Colors */
+/* Colors */
 .text-primary { color: var(--primary); }
 .text-success { color: var(--success); }
 .text-error { color: var(--error); }
 .max-total { font-size: 0.8rem; color: var(--text-sec); font-weight: normal; }
 
-/* Glassmorphism & iOS Effects */
-.glass-effect { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.05); }
-.dark-mode .glass-effect { background: rgba(28, 28, 30, 0.65); border: 1px solid rgba(255,255,255,0.05); }
+/* Glassmorphism */
+.glass-effect { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+.dark-mode .glass-effect { background: rgba(28, 28, 30, 0.7); border: 1px solid rgba(255,255,255,0.05); }
 
 /* Animations */
 .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -43,27 +43,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 
 /* Welcome Screen */
 .hero-bg { position: fixed; inset: 0; background: url('bino.png') no-repeat center center/cover; z-index: -1; }
-.hero-overlay { height: 100vh; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; padding: 20px; }
-.hero-card { width: 100%; max-width: 500px; text-align: center; padding: 40px; border-radius: 35px; color: var(--text); }
+.hero-overlay { height: 100vh; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.hero-card { width: 100%; max-width: 550px; text-align: center; padding: 40px; border-radius: 35px; color: var(--text); }
 .hero-badge { background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin-bottom: 15px; font-weight: 600; }
 .main-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; }
 .hero-subtitle { font-size: 1.05rem; opacity: 0.9; margin-bottom: 20px; line-height: 1.5; }
 .rules-box { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 15px; text-align: left; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6; }
 .dark-mode .rules-box { background: rgba(255,255,255,0.1); }
 .premium-input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 15px; font-size: 1.05rem; text-align: center; background: var(--card); color: var(--text); font-weight: 600; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); outline: none; transition: 0.3s; }
-.premium-input:focus { box-shadow: 0 0 0 3px rgba(0,122,255,0.3); }
-.btn-start { width: 100%; padding: 18px; border-radius: 18px; background: var(--primary); color: white; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; }
+.btn-start { width: 100%; padding: 18px; border-radius: 18px; background: var(--primary); color: white; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
 .btn-start:active { transform: scale(0.96); }
+
+/* IJTIMOIY TARMOQLAR FIX */
+.social-links { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
+.social-links img { width: 45px; height: 45px; object-fit: contain; opacity: 0.9; transition: 0.3s ease; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+.social-links img:hover { transform: translateY(-5px) scale(1.1); opacity: 1; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
 
 /* Nav */
 .global-nav { padding: 12px 20px; background: var(--glass-effect); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
-.nav-logo { width: 35px; border-radius: 50%; }
-.logo-text { font-weight: 800; font-size: 1rem; color: var(--text); margin-left: 8px; }
+.nav-logo { width: 35px; border-radius: 50%; cursor: pointer; }
+.logo-text { font-weight: 800; font-size: 1rem; color: var(--text); margin-left: 8px; cursor: pointer;}
 .badge { font-size: 0.6rem; background: var(--error); color: white; padding: 2px 6px; border-radius: 10px; vertical-align: top; }
 .nav-right { display: flex; gap: 10px; align-items: center; }
 .timer-badge { background: var(--error); color: white; padding: 5px 10px; border-radius: 10px; font-weight: 700; font-family: ui-monospace, monospace; }
-.exit-mini { background: rgba(255, 59, 48, 0.1); color: var(--error); border: none; padding: 6px 12px; border-radius: 10px; font-weight: 600; }
-.theme-btn { background: var(--card); border: none; padding: 6px 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.exit-mini { background: rgba(255, 59, 48, 0.1); color: var(--error); border: none; padding: 6px 12px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.theme-btn { background: var(--card); border: none; padding: 6px 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
 
 /* Dashboard */
 .dash-header { margin-bottom: 30px; }
@@ -77,28 +81,34 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .btn-special { grid-column: span 2; background: var(--accent); color: white; }
 .btn-outline { grid-column: span 2; background: transparent; border: 2px solid var(--primary); color: var(--primary); }
 .btn-error { grid-column: span 2; background: rgba(255, 59, 48, 0.1); color: var(--error); }
-.btn-error:disabled { opacity: 0.4; color: var(--text-sec); background: var(--card); }
+.btn-error:disabled { opacity: 0.4; color: var(--text-sec); background: var(--card); cursor: not-allowed; }
 
-/* Chapters Grid & Progress */
+/* Chapters Grid (Bo'limlar) */
 .chapters-box { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
 .chap-btn { background: var(--card); border: none; padding: 12px 5px; border-radius: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-size: 0.9rem; color: var(--text); display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .chap-prog { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: rgba(0,0,0,0.05); color: var(--text-sec); }
 .chap-prog.full { background: rgba(52, 199, 89, 0.2); color: var(--success); }
 
-/* Setup Screen (Segmented Controls) */
+/* Setup Screen (Test Parametrlari) */
 .setup-container { display: flex; align-items: center; justify-content: center; height: 80vh; }
 .setup-card { width: 100%; max-width: 450px; padding: 30px; border-radius: 30px; color: var(--text); }
 .setup-card h2 { text-align: center; margin-bottom: 25px; }
 .setup-group { margin-bottom: 25px; }
 .setup-group label { font-weight: 600; margin-bottom: 10px; display: block; }
-.segmented-control { display: flex; background: rgba(118, 118, 128, 0.12); border-radius: 12px; padding: 3px; }
-.seg-btn { flex: 1; padding: 10px; border: none; background: transparent; border-radius: 10px; font-weight: 600; font-size: 0.85rem; color: var(--text); transition: 0.3s; cursor: pointer; }
-.seg-btn.active { background: var(--card); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
-.diff-easy.active { color: var(--success); }
-.diff-medium.active { color: var(--warning); }
-.diff-hard.active { color: var(--error); }
-.order-random.active { color: var(--accent); }
-.small-note { font-size: 0.75rem; color: var(--text-sec); margin-top: 8px; }
+
+.segmented-control { display: flex; background: rgba(118, 118, 128, 0.12); border-radius: 12px; padding: 3px; gap: 2px; }
+.flex-col { flex-direction: column; }
+.seg-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 10px; font-weight: 600; font-size: 0.85rem; color: var(--text-sec); transition: 0.3s; cursor: pointer; }
+.order-opt { text-align: left; padding-left: 20px; }
+
+/* QIYINLIK RANGLARI */
+.diff-easy.active { background: var(--success); color: white; box-shadow: 0 3px 8px rgba(52,199,89,0.3); }
+.diff-medium.active { background: var(--warning); color: white; box-shadow: 0 3px 8px rgba(255,149,0,0.3); }
+.diff-hard.active { background: var(--error); color: white; box-shadow: 0 3px 8px rgba(255,59,48,0.3); }
+/* TARTIB RANGLARI */
+.order-random.active, .order-seq.active { background: var(--card); color: var(--primary); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+
+.small-note { font-size: 0.75rem; color: var(--text-sec); margin-top: 8px; font-style: italic; }
 .setup-actions { display: flex; gap: 10px; }
 .btn-cancel, .btn-start-test { flex: 1; padding: 15px; border-radius: 15px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; }
 .btn-cancel { background: rgba(118, 118, 128, 0.12); color: var(--text); }
@@ -121,8 +131,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .q-text { font-size: 1.25rem; font-weight: 700; margin-bottom: 25px; line-height: 1.4; }
 .option-btn { width: 100%; padding: 18px 20px; margin-bottom: 12px; border-radius: 18px; border: 2px solid rgba(0,0,0,0.03); background: var(--bg); text-align: left; font-size: 1.05rem; font-weight: 600; cursor: pointer; color: var(--text); transition: 0.2s; }
 .option-btn:active:not(:disabled) { transform: scale(0.98); background: rgba(0,122,255,0.1); }
-.option-btn.correct-ans { background: rgba(52, 199, 89, 0.15); border-color: var(--success); color: var(--success); }
+
+/* FAQAT XATO TANLANGANDA QIZIL BO'LADI. TO'G'RINI KO'RSATMAYMIZ! */
 .option-btn.wrong-ans { background: rgba(255, 59, 48, 0.15); border-color: var(--error); color: var(--error); text-decoration: line-through; opacity: 0.8; }
+.option-btn.correct-ans { background: rgba(52, 199, 89, 0.15); border-color: var(--success); color: var(--success); }
 
 .nav-controls { display: flex; gap: 10px; margin-top: 10px; }
 .nav-btn { flex: 1; padding: 16px; border-radius: 18px; background: var(--card); border: none; color: var(--primary); font-weight: 700; font-size: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; }
