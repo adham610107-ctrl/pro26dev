@@ -28,23 +28,29 @@
                 <div class="hero-badge">Shaxsiy Loyiha</div>
                 <h1 class="main-title">Xush kelibsiz!</h1>
                 <p class="hero-subtitle">
-                    Ushbu sayt sizning bilimlaringizni sinab ko'rish va yakuniy imtihonlarga mukammal tayyorgarlik ko'rishingiz uchun yaratilgan shaxsiy loyihadir. Bu Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi!
+                    Bu sayt nima vazifani bajaradi? Ushbu platforma mening shaxsiy loyiham bo'lib, sizni yakuniy imtihonlarga mukammal tayyorlash, bilimlaringizni sinash va xatolar ustida mustaqil ishlash imkoniyatini beradi.<br><br>
+                    <b>Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi.</b>
                 </p>
                 <div class="rules-box">
-                    <p>✅ <b>Qoida:</b> 20 ta savolga 100% to'g'ri javob berilmaguncha test yakunlanmaydi.</p>
-                    <p>✅ <b>Yashirin Javob:</b> Xato qilsangiz, to'g'ri javob ko'rsatilmaydi! O'zingiz topishingiz kerak.</p>
+                    <p>✅ <b>Qoida:</b> 20 ta savolga 100% to'g'ri javob bermaguningizcha test yakunlanmaydi.</p>
+                    <p>✅ <b>Yashirin Javob:</b> Xato qilsangiz, to'g'ri javob ko'rsatilmaydi! Mustaqil izlab topishingiz zarur.</p>
                 </div>
                 
                 <div class="login-form">
-                    <input type="text" id="student-name" class="premium-input" placeholder="Ism familiyangizni kiriting...">
-                    <button class="btn-start pulse" onclick="handleLogin()">Tizimga kirish</button>
+                    <input type="text" id="student-name" class="premium-input" placeholder="Ism familiyangizni kiriting..." autocomplete="off">
+                    <button class="btn-start pulse" onclick="handleLogin()">Platformaga kirish</button>
                 </div>
 
                 <div class="social-links">
-                    <a href="https://t.me/atamuratovs" target="_blank"><img src="tg.png" alt="Telegram"></a>
-                    <a href="https://www.instagram.com/strovln" target="_blank"><img src="insta.png" alt="Instagram"></a>
+                    <a href="https://t.me/atamuratovs" target="_blank" class="social-btn">
+                        <img src="tg.png" alt="Telegram">
+                    </a>
+                    <a href="https://www.instagram.com/strovln" target="_blank" class="social-btn">
+                        <img src="insta.png" alt="Instagram">
+                    </a>
                 </div>
             </div>
+            <footer class="app-footer-welcome">Adham's copyright 2026 &copy;</footer>
         </div>
     </div>
 
@@ -70,6 +76,7 @@
 
             <div id="chapters-grid" class="hidden chapters-box slide-up"></div>
         </div>
+        <footer class="app-footer">Adham's copyright 2026 &copy;</footer>
     </div>
 
     <div id="setup-screen" class="screen hidden">
@@ -92,7 +99,7 @@
                         <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 1-dan 20-gacha random almashtirish</button>
                         <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ 1-dan 20-gacha ketma-ketlikda</button>
                     </div>
-                    <p class="small-note">*Eslatma: Variantlar (A, B, C, D) doim random bo'ladi!</p>
+                    <p class="small-note">*Eslatma: Variantlar (A, B, C, D) doim aralashtiriladi!</p>
                 </div>
 
                 <div class="setup-actions">
@@ -101,6 +108,7 @@
                 </div>
             </div>
         </div>
+        <footer class="app-footer">Adham's copyright 2026 &copy;</footer>
     </div>
 
     <div id="test-screen" class="screen hidden">
@@ -112,7 +120,10 @@
             </div>
 
             <div class="question-container">
-                <div id="question-area" class="q-card-premium"></div>
+                <div id="question-list-wrapper" class="q-list-wrapper">
+                    <div id="all-questions-area"></div>
+                    <div style="height: 40vh;"></div> </div>
+                
                 <div class="nav-controls">
                     <button class="nav-btn" onclick="move(-1)">⬅️ Oldingi</button>
                     <button id="finish-btn" class="finish-btn hidden" onclick="finishExam()">Tugatish ✔️</button>
