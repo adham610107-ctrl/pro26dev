@@ -10,7 +10,7 @@
 <body class="light-mode" id="main-body">
 
     <nav class="global-nav hidden" id="global-nav">
-        <div class="logo-area" onclick="logout()">
+        <div class="logo-area" onclick="logout()" title="Tizimdan chiqish">
             <img src="logo.png" alt="Logo" class="nav-logo">
             <span class="logo-text">PRO EXAM <span class="badge">v5.0</span></span>
         </div>
@@ -28,21 +28,21 @@
                 <div class="hero-badge">Shaxsiy Loyiha</div>
                 <h1 class="main-title">Xush kelibsiz!</h1>
                 <p class="hero-subtitle">
-                    Ushbu platforma talabalar uchun maxsus ishlab chiqilgan shaxsiy, professional tayyorgarlik tizimidir. Bu yerda siz o'z bilimlaringizni sinab ko'rishingiz, xatolar ustida ishlashingiz va yakuniy imtihonlarga mukammal tayyorgarlik ko'rishingiz mumkin.
+                    Ushbu sayt sizning bilimlaringizni sinab ko'rish va yakuniy imtihonlarga mukammal tayyorgarlik ko'rishingiz uchun yaratilgan shaxsiy loyihadir. Bu Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi!
                 </p>
                 <div class="rules-box">
                     <p>✅ <b>Qoida:</b> 20 ta savolga 100% to'g'ri javob berilmaguncha test yakunlanmaydi.</p>
-                    <p>✅ <b>Tizim:</b> Sizning o'zlashtirish va xatolar statiskangiz shaxsiy xotirada saqlanadi.</p>
+                    <p>✅ <b>Yashirin Javob:</b> Xato qilsangiz, to'g'ri javob ko'rsatilmaydi! O'zingiz topishingiz kerak.</p>
                 </div>
                 
                 <div class="login-form">
                     <input type="text" id="student-name" class="premium-input" placeholder="Ism familiyangizni kiriting...">
-                    <button class="btn-start pulse" onclick="handleLogin()">Platformaga kirish</button>
+                    <button class="btn-start pulse" onclick="handleLogin()">Tizimga kirish</button>
                 </div>
 
                 <div class="social-links">
-                    <a href="https://t.me/atamuratovs"><img src="tg.png" alt="TG"></a>
-                    <a href="https://www.instagram.com/strovln"><img src="inst.png" alt="INST"></a>
+                    <a href="https://t.me/atamuratovs" target="_blank"><img src="tg.png" alt="Telegram"></a>
+                    <a href="https://www.instagram.com/strovln" target="_blank"><img src="insta.png" alt="Instagram"></a>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
                 <button class="cat-btn" onclick="openSetup('cholgu_ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
                 <button class="cat-btn" onclick="openSetup('vokal_ijrochiligi')">🎤 Vokal ijrochiligi</button>
                 <button class="cat-btn" onclick="openSetup('metodika_repertuar')">📚 Metodika</button>
-                <button class="cat-btn btn-special" onclick="openSetup('mixed')">🎲 1-800 Aralash (20 ta)</button>
+                <button class="cat-btn btn-special" onclick="openSetup('mixed')">🎲 1-800 Aralash</button>
                 <button class="cat-btn btn-outline" onclick="toggleChapters()">📑 Bo'limlar (1-800)</button>
                 <button id="error-work-btn" class="cat-btn btn-error" onclick="openSetup('errors')" disabled>🛠 Xatolar ustida ishlash</button>
             </div>
@@ -80,19 +80,19 @@
                 <div class="setup-group">
                     <label>Qiyinlik darajasi (Vaqt):</label>
                     <div class="segmented-control difficulty-control">
-                        <button class="seg-btn diff-easy active" onclick="setDifficulty('easy', this)">Oson (20 daq)</button>
-                        <button class="seg-btn diff-medium" onclick="setDifficulty('medium', this)">O'rtacha (15 daq)</button>
-                        <button class="seg-btn diff-hard" onclick="setDifficulty('hard', this)">Qiyin (10 daq)</button>
+                        <button class="seg-btn diff-easy active" onclick="setDifficulty('easy', this)">Oson</button>
+                        <button class="seg-btn diff-medium" onclick="setDifficulty('medium', this)">O'rtacha</button>
+                        <button class="seg-btn diff-hard" onclick="setDifficulty('hard', this)">Qiyin</button>
                     </div>
                 </div>
 
                 <div class="setup-group">
                     <label>Savollar tartibi:</label>
-                    <div class="segmented-control order-control">
-                        <button class="seg-btn order-random active" onclick="setOrder('random', this)">🎲 Random (Aralash)</button>
-                        <button class="seg-btn order-seq" onclick="setOrder('sequential', this)">⬇️ Ketma-ketlikda</button>
+                    <div class="segmented-control order-control flex-col">
+                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 1-dan 20-gacha random almashtirish</button>
+                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ 1-dan 20-gacha ketma-ketlikda</button>
                     </div>
-                    <p class="small-note">*Eslatma: Javob variantlari (A, B, C, D) har doim aralashtiriladi!</p>
+                    <p class="small-note">*Eslatma: Variantlar (A, B, C, D) doim random bo'ladi!</p>
                 </div>
 
                 <div class="setup-actions">
