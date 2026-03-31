@@ -428,5 +428,30 @@ function goHome() {
 
 function switchScreen(hideId, showId) {
     document.getElementById(hideId).classList.replace('active', 'hidden');
-    document.getElementById(showId).classList.replace('hidden', 'active');
+    document.getElementById(showId).classList.replace('hidden', 'active');// Savollar blokini boshqarish
+let currentQuestions = [];
+let hasError = false;
+
+function startRound(questions) {
+    currentQuestions = questions; // 20 ta savol
+    hasError = false;
+    renderQuestion(0);
+}
+
+function handleAnswer(isCorrect) {
+    if (!isCorrect) {
+        hasError = true; // Bitta xato bo'lsa ham belgi qo'yiladi
+    }
+    // ... keyingi savolga o'tish
+}
+
+function finishRound() {
+    if (hasError) {
+        alert("Xato bor! Ushbu 20 talikni boshidan boshlaysiz.");
+        startRound(currentQuestions); // Xato bo'lsa aynan shu blokni qaytarish
+    } else {
+        alert("Ajoyib! 100% natija. Keyingi blokga o'tamiz.");
+        loadNextNewBatch(); // Faqat hammasi to'g'ri bo'lganda yangi savol berish
+    }
+}
 }
