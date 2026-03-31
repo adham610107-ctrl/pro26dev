@@ -3,293 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRO EXAM v7.0 | Adham's Development</title>
+    <title>PRO EXAM | Universal System</title>
     <style>
-        /* --- 1. UNIVERSAL & GLASSMORPHISM DESIGN --- */
+        /* --- DYNAMIC THEME & GLASSMORPHISM --- */
         :root {
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --bg-dark: #0f172a;
-            --accent: #3b82f6;
-            --correct: #10b981;
-            --wrong: #ef4444;
-            --text: #f8fafc;
+            --bg: #020617;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --error: #ef4444;
+            --text-main: #f1f5f9;
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: var(--text);
-            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- 2. FIXED HEADER (LIVE SCORE & PROGRESS) --- */
-        .exam-header {
+        /* --- STICKY SMART HEADER --- */
+        .smart-header {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--glass-border);
-            padding: 10px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            padding: 12px 15px;
         }
 
-        .top-bar {
+        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 12px;
         }
 
-        .stats-group {
-            display: flex;
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: var(--glass);
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border: 1px solid var(--glass-border);
+        .brand-logo {
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--accent);
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
-        .stat-box.correct { color: var(--correct); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
-        .stat-box.wrong { color: var(--wrong); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+        .live-counter {
+            display: flex;
+            gap: 8px;
+        }
 
-        /* --- 3. AUTO-SWITCH INDICATOR BAR (SAVOLLAR XARITASI) --- */
-        .indicator-wrapper {
+        .counter-pill {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- AUTO-SCROLL INDICATOR BAR (THE "MAGIC" PART) --- */
+        .indicator-scroll-area {
             width: 100%;
             overflow-x: auto;
-            white-space: nowrap;
+            display: flex;
+            gap: 10px;
             padding: 5px 0 10px 0;
-            scrollbar-width: none; /* Firefox */
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
-        .indicator-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        .indicator-scroll-area::-webkit-scrollbar { display: none; }
 
-        .indicator-bar {
-            display: inline-flex;
-            gap: 8px;
-            padding: 0 10px;
-        }
-
-        .step-node {
-            min-width: 35px;
-            height: 35px;
-            border-radius: 10px;
-            background: var(--glass);
+        .step-item {
+            min-width: 40px;
+            height: 40px;
+            background: var(--card-bg);
             border: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: bold;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .step-node.active {
-            transform: scale(1.1);
-            border-color: var(--accent);
-            color: white;
-            background: var(--accent);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-        }
-
-        .step-node.done-correct { background: var(--correct); color: white; border: none; }
-        .step-node.done-wrong { background: var(--wrong); color: white; border: none; }
-
-        /* --- 4. MAIN CONTENT AREA --- */
-        .main-container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
-        .question-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.5s ease;
-        }
-
-        .question-text {
-            font-size: 1.2rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .options-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .option-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 15px 20px;
             border-radius: 12px;
-            color: white;
-            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
-            transition: 0.2s;
-            font-size: 1rem;
+            flex-shrink: 0;
         }
 
-        .option-btn:hover { background: rgba(255, 255, 255, 0.1); }
-        .option-btn:active { transform: scale(0.98); }
+        .step-item.current {
+            background: var(--accent);
+            color: #000;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
+
+        .step-item.correct { background: var(--success); border: none; }
+        .step-item.wrong { background: var(--error); border: none; }
+
+        /* --- QUESTION AREA --- */
+        .quiz-wrapper {
+            max-width: 650px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        .question-box {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .q-meta { color: var(--accent); font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+
+        .q-title { font-size: 20px; line-height: 1.4; margin-bottom: 25px; min-height: 60px; }
+
+        .options-list { display: grid; gap: 12px; }
+
+        .opt-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 18px;
+            border-radius: 16px;
+            color: #cbd5e1;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opt-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--accent); }
+
+        /* --- MODAL RESULTS --- */
+        #resultModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .res-circle { width: 150px; height: 150px; border-radius: 50%; border: 8px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; margin-bottom: 20px; }
 
         /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .shake { animation: shake 0.3s ease-in-out; }
-
+        @keyframes pop { 0% { transform: scale(0.9); } 100% { transform: scale(1); } }
+        .pop-in { animation: pop 0.3s ease-out; }
     </style>
 </head>
 <body>
 
-    <!-- INTEGRATED HEADER -->
-    <header class="exam-header">
-        <div class="top-bar">
-            <div class="stats-group">
-                <div class="stat-box correct">✅ <span id="correctScore">0</span></div>
-                <div class="stat-box wrong">❌ <span id="wrongScore">0</span></div>
+    <header class="smart-header">
+        <div class="header-top">
+            <div class="brand-logo">💎 PRO EXAM v7.5</div>
+            <div class="live-counter">
+                <div class="counter-pill" style="color: var(--success)">✅ <span id="c-count">0</span></div>
+                <div class="counter-pill" style="color: var(--error)">❌ <span id="w-count">0</span></div>
             </div>
-            <div class="stat-box">SAVOL: <span id="currentTitle">1</span> / <span id="totalTitle">60</span></div>
         </div>
 
-        <!-- AUTO-SWITCH INDICATOR BAR -->
-        <div class="indicator-wrapper" id="scrollWrapper">
-            <div class="indicator-bar" id="indicatorBar">
-                <!-- JS will inject nodes here -->
-            </div>
+        <!-- MAGIC INDICATOR BAR -->
+        <div class="indicator-scroll-area" id="indicatorBar">
+            <!-- Nodes injected by JS -->
         </div>
     </header>
 
-    <main class="main-container">
-        <div id="quiz-app" class="question-card">
-            <div class="question-text" id="qText">Savol yuklanmoqda...</div>
-            <div class="options-grid" id="optionsContainer">
-                <!-- Options will appear here -->
+    <main class="quiz-wrapper">
+        <div class="question-box pop-in" id="qBox">
+            <div class="q-meta" id="qProgress">Savol 1 / 60</div>
+            <div class="q-title" id="qTitle">Yuklanmoqda...</div>
+            <div class="options-list" id="optList">
+                <!-- Buttons injected by JS -->
             </div>
         </div>
     </main>
 
-    <script>
-        // --- 5. CORE LOGIC INTEGRATION ---
-        const totalQuestions = 60; // Testlar soni
-        let currentIdx = 0;
-        let correctCount = 0;
-        let wrongCount = 0;
+    <!-- RESULT MODAL -->
+    <div id="resultModal">
+        <h2>Imtihon Yakunlandi!</h2>
+        <div class="res-circle" id="finalPercent">0%</div>
+        <p id="finalStatText">Jami: 60 ta | To'g'ri: 0 | Xato: 0</p>
+        <button onclick="location.reload()" class="opt-btn" style="margin-top: 30px; background: var(--accent); color: #000; font-weight: bold; width: 200px; text-align: center;">Qayta Boshlash</button>
+    </div>
 
-        // Indikatorlarni yaratish
-        function initIndicators() {
+    <script>
+        // --- DATA & LOGIC ---
+        const config = {
+            total: 20, // Test uchun 20 ta qildim, xohlasangiz 200 qiling
+            current: 0,
+            correct: 0,
+            wrong: 0
+        };
+
+        // Savollar bazasi (Namuna)
+        const db = [
+            { q: "Kamaytirilgan septakkord (VII7) qanday tuziladi?", a: ["k.3 + k.3 + k.3", "m.3 + k.3 + m.3", "k.3 + m.3 + m.3"], right: 0 },
+            { q: "Musiqada 'Piano' termini nimani anglatadi?", a: ["Tez", "Sokin", "Juda baland"], right: 1 },
+            { q: "Garmonik minor gammasida qaysi pog'ona orttiriladi?", a: ["VI", "VII", "II"], right: 1 }
+            // Savollarni shu tartibda ko'paytirish mumkin
+        ];
+
+        function init() {
             const bar = document.getElementById('indicatorBar');
-            document.getElementById('totalTitle').innerText = totalQuestions;
-            
-            for (let i = 1; i <= totalQuestions; i++) {
-                const node = document.createElement('div');
-                node.className = 'step-node';
-                node.id = `node-${i-1}`;
-                node.innerText = i;
-                bar.appendChild(node);
+            for(let i=0; i < config.total; i++) {
+                const item = document.createElement('div');
+                item.className = 'step-item';
+                item.id = `step-${i}`;
+                item.innerText = i + 1;
+                bar.appendChild(item);
             }
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // UI Yangilash
+            document.getElementById('qProgress').innerText = `Savol ${config.current + 1} / ${config.total}`;
+            const currentData = db[config.current % db.length]; // Savollar tugasa takrorlanadi
+            document.getElementById('qTitle').innerText = currentData.q;
+            
+            const list = document.getElementById('optList');
+            list.innerHTML = '';
+            
+            currentData.a.forEach((txt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = txt;
+                btn.onclick = () => select(idx, currentData.right, btn);
+                list.appendChild(btn);
+            });
+
             updateIndicator();
         }
 
-        // Indikatorni yangilash va AVTO-SKROLL
         function updateIndicator() {
-            // Klasslarni tozalash va yangilash
-            document.querySelectorAll('.step-node').forEach(n => n.classList.remove('active'));
-            const activeNode = document.getElementById(`node-${currentIdx}`);
+            // Aktiv doirani markazga surish (The Magic Scroll)
+            document.querySelectorAll('.step-item').forEach(el => el.classList.remove('current'));
+            const activeNode = document.getElementById(`step-${config.current}`);
+            activeNode.classList.add('current');
             
-            if (activeNode) {
-                activeNode.classList.add('active');
-                document.getElementById('currentTitle').innerText = currentIdx + 1;
-
-                // MAGICAL AUTO-SCROLL: Aktiv elementni doim o'rtaga suradi
-                activeNode.scrollIntoView({
-                    behavior: 'smooth',
-                    inline: 'center',
-                    block: 'nearest'
-                });
-            }
-        }
-
-        // Javobni tekshirish (Simulatsiya)
-        function checkAnswer(isCorrect, btn) {
-            const node = document.getElementById(`node-${currentIdx}`);
-            
-            if (isCorrect) {
-                correctCount++;
-                document.getElementById('correctScore').innerText = correctCount;
-                node.classList.add('done-correct');
-                btn.style.background = "var(--correct)";
-            } else {
-                wrongCount++;
-                document.getElementById('wrongScore').innerText = wrongCount;
-                node.classList.add('done-wrong');
-                btn.style.background = "var(--wrong)";
-                document.getElementById('quiz-app').classList.add('shake');
-                setTimeout(() => document.getElementById('quiz-app').classList.remove('shake'), 300);
-            }
-
-            // 1 soniya kutib keyingi savolga avto-o'tish
-            setTimeout(() => {
-                if (currentIdx < totalQuestions - 1) {
-                    currentIdx++;
-                    renderQuestion();
-                    updateIndicator();
-                } else {
-                    alert("Tabriklaymiz! Test yakunlandi.");
-                }
-            }, 800);
-        }
-
-        // Savolni ekranga chiqarish (Mockup)
-        function renderQuestion() {
-            const qText = document.getElementById('qText');
-            const container = document.getElementById('optionsContainer');
-            
-            qText.innerText = `${currentIdx + 1}-savol: Kamaytirilgan septakkord qanday tuziladi?`;
-            container.innerHTML = '';
-
-            const options = [
-                { t: "Kichik tertsiya + Kichik tertsiya + Kichik tertsiya", c: true },
-                { t: "Majorli uchtovushlik + Minorli septima", c: false },
-                { t: "Minorli uchtovushlik + Katta septima", c: false },
-                { t: "Sokin va tekis ohangda", c: false }
-            ];
-
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt.t;
-                btn.onclick = () => checkAnswer(opt.c, btn);
-                container.appendChild(btn);
+            activeNode.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest'
             });
         }
 
-        // Start
-        window.onload = () => {
-            initIndicators();
-            renderQuestion();
-        };
+        function select(idx, rightIdx, btn) {
+            const node = document.getElementById(`step-${config.current}`);
+            const buttons = document.querySelectorAll('.opt-btn');
+            buttons.forEach(b => b.disabled = true); // Bir marta tanlash mumkin
+
+            if(idx === rightIdx) {
+                config.correct++;
+                btn.style.background = "var(--success)";
+                btn.style.borderColor = "var(--success)";
+                node.classList.add('correct');
+            } else {
+                config.wrong++;
+                btn.style.background = "var(--error)";
+                btn.style.borderColor = "var(--error)";
+                node.classList.add('wrong');
+                // To'g'ri javobni ham ko'rsatish (Professional yondashuv)
+                buttons[rightIdx].style.border = "2px solid var(--success)";
+            }
+
+            document.getElementById('c-count').innerText = config.correct;
+            document.getElementById('w-count').innerText = config.wrong;
+
+            // Avto-o'tish
+            setTimeout(() => {
+                if(config.current < config.total - 1) {
+                    config.current++;
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1000);
+        }
+
+        function showResult() {
+            const modal = document.getElementById('resultModal');
+            const percent = Math.round((config.correct / config.total) * 100);
+            document.getElementById('finalPercent').innerText = percent + "%";
+            document.getElementById('finalStatText').innerText = `Jami: ${config.total} | To'g'ri: ${config.correct} | Xato: ${config.wrong}`;
+            modal.style.display = 'flex';
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
