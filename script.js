@@ -1,457 +1,273 @@
-let bank = [];
+// Global State
+let fullBank = [];
 let currentTest = [];
 let userAnswers = [];
 let currentIndex = 0;
-let currentUser = null;
-let timerInterval;
+let userName = "";
+let hasMadeMistake = false; // CRITICAL: 100% logic tracker
+let examTimer = null;
 
-let pendingSubject = null;
-let pendingPool = [];
-let diffTime = 900; 
-let orderMode = 'random'; 
-let isExamMode = false;
+let pendingConfig = { mode: null, subject: null, level: null };
+let testOptions = { order: 'random' }; // diff is visual only now
 
-// 1. Ma'lumotlarni yuklash va Tozalash (3 ta variant bo'lsa 4-sini qo'shish)
+// 1. Dastlabki yuklanish
 async function loadData() {
     const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
-    let globalIndex = 0;
-    
-    for (const f of files) {
+    let gId = 0;
+    for(let f of files) {
         try {
             const res = await fetch(f);
             const data = await res.json();
-            const subject = f.split('.')[0];
-            
-            data.forEach((q) => {
-                // Dublikatlarni tozalash
-                let rawOpts = q.options.filter(o => o && o.toString().trim() !== ''); 
-                let uniqueOpts = [...new Set(rawOpts)]; 
+            const sub = f.split('.')[0];
+            data.forEach(q => {
+                let opts = q.options.filter(o => o && o.trim() !== '');
+                let uniqueOpts = [...new Set(opts)];
+                let correctText = q.options[q.answer];
                 
-                let correctText = q.options[q.answer]; 
+                // Fix: 3 option bug
+                if(uniqueOpts.length === 3) uniqueOpts.push("Barcha javoblar to'g'ri");
                 
-                // Aynan 3 ta qolgan bo'lsa:
-                if (uniqueOpts.length === 3) {
-                    uniqueOpts.push("Barcha javoblar to'g'ri");
-                }
-                
-                let newAnsIdx = uniqueOpts.indexOf(correctText);
-                if (newAnsIdx === -1) newAnsIdx = 0;
-
-                bank.push({ ...q, id: `q_${globalIndex}`, subject, options: uniqueOpts, answer: newAnsIdx });
-                globalIndex++;
+                let newAnsIdx = uniqueOpts.indexOf(correctText) > -1 ? uniqueOpts.indexOf(correctText) : 0;
+                fullBank.push({ id: `q_${gId++}`, subject: sub, q: q.q || q.question, options: uniqueOpts, answerText: uniqueOpts[newAnsIdx] });
             });
-        } catch (e) { console.warn(f + " yuklanmadi. Fayllarni tekshiring."); }
+        } catch(e) { console.log(f + " topilmadi"); }
     }
 }
 
 window.onload = async () => {
     await loadData();
-    // Default holat (Eye comfort - Dark mode) CSS orqali sozlangan. 
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.remove('dark-mode');
-    } else {
-        document.body.classList.add('dark-mode');
+    let savedName = localStorage.getItem('adham_user_name');
+    if(savedName) {
+        document.getElementById('student-name').value = savedName;
     }
 };
 
-function handleLogin() {
-    const name = document.getElementById('student-name').value.trim();
-    if (name.length < 2) return alert("Iltimos, testni boshlash uchun ismingizni kiriting.");
-    
-    currentUser = name;
-    document.getElementById('display-name').innerText = name;
-    updateStats();
-    
-    switchScreen('welcome-screen', 'dashboard-screen');
-    document.getElementById('global-nav').classList.remove('hidden');
+// 2. Navigatsiya va Boshqaruv
+function getEl(id) { return document.getElementById(id); }
+function hide(id) { getEl(id).classList.add('hidden'); }
+function show(id) { getEl(id).classList.remove('hidden'); }
+function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+function enterDashboard() {
+    let inp = getEl('student-name').value.trim();
+    if(!inp) return alert("Ismingizni kiriting!");
+    userName = inp;
+    localStorage.setItem('adham_user_name', userName);
+    getEl('user-display').innerText = userName;
+    updateStatsUI();
+    hide('welcome-screen'); show('dashboard-screen');
 }
 
-function updateStats() {
-    let userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
+function updateStatsUI() {
+    let stats = JSON.parse(localStorage.getItem(`stats_${userName}`)) || { mastered: [], mistakes: [] };
+    getEl('learned-count').innerText = stats.mastered.length;
+    getEl('error-count').innerText = stats.mistakes.length;
     
-    document.getElementById('learned-count').innerText = userDb.learned.length;
-    document.getElementById('error-count').innerText = userDb.errors.length;
-    
-    // Xatolar tugmasini faollashtirish/bloklash
-    const errBtn = document.getElementById('error-work-btn');
-    if(userDb.errors.length === 0) {
+    let errBtn = getEl('error-btn');
+    if(stats.mistakes.length === 0) {
         errBtn.style.opacity = '0.5';
-        errBtn.onclick = () => alert("Sizda xatolar yo'q. Ajoyib natija!");
+        errBtn.onclick = () => alert("Sizda xatolar yo'q!");
     } else {
         errBtn.style.opacity = '1';
-        errBtn.onclick = () => openSetup('errors', 'Xatolar ustida ishlash');
+        errBtn.onclick = () => setupTest('errors', 'Xatolar ustida ishlash');
     }
 }
 
-// 4 ta fanning 10 ta leveli
-function openLevelsModal(subjectId, subjectName) {
-    document.getElementById('level-modal-title').innerText = subjectName;
-    const grid = document.getElementById('levels-grid');
-    grid.innerHTML = '';
+// 3. Modal va Sozlamalar
+function openLevels(sub, title) {
+    pendingConfig.subject = sub;
+    getEl('level-title').innerText = title;
+    let container = getEl('levels-container');
+    container.innerHTML = '';
     
-    const userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
-    let subPool = bank.filter(q => q.subject === subjectId);
-    
-    for(let i=0; i<10; i++) {
-        let start = i * 20;
-        let end = start + 20;
-        let chunk = subPool.slice(start, end);
-        if(chunk.length === 0) break; 
-        
-        let learnedInChunk = chunk.filter(q => userDb.learned.includes(q.id)).length;
-        
+    for(let i=1; i<=10; i++) {
         let btn = document.createElement('button');
-        btn.className = 'level-btn';
-        btn.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span class="lvl-num">${i+1}</span>
-                <span>${start + 1}-${end}</span>
-            </div>
-            <span class="${learnedInChunk === chunk.length ? 'text-success' : 'text-sec'}">
-                ${learnedInChunk}/${chunk.length}
-            </span>
-        `;
-        btn.onclick = () => { 
-            closeLevelsModal();
-            pendingSubject = subjectId; 
-            pendingPool = chunk; 
-            showSetup(`${subjectName} (Level ${i+1})`); 
-        };
-        grid.appendChild(btn);
+        btn.className = 'lvl-btn'; btn.innerText = `${i}-Blok`;
+        btn.onclick = () => { pendingConfig.mode = 'level'; pendingConfig.level = i; closeModal('levels-modal'); show('setup-modal'); };
+        container.appendChild(btn);
     }
-    document.getElementById('levels-modal').classList.remove('hidden');
+    show('levels-modal');
 }
 
-function closeLevelsModal() { document.getElementById('levels-modal').classList.add('hidden'); }
+function setupTest(mode, title) {
+    pendingConfig.mode = mode;
+    show('setup-modal');
+}
 
-function openSetup(type, title) {
-    const userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
-    isExamMode = false;
+function setDiff(btn) { document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+function setOrder(btn) { document.querySelectorAll('.ord-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); testOptions.order = btn.dataset.order; }
+function closeModal(id) { hide(id); }
 
-    if (type === 'errors') {
-        pendingPool = bank.filter(q => userDb.errors.includes(q.id));
-    } else if (type === 'mixed') {
-        pendingPool = [...bank]; // Global aralash
+// 4. Testni Boshlash
+function startExam() { pendingConfig.mode = 'exam'; launchTest(); }
+
+function launchTest() {
+    hide('setup-modal'); hide('dashboard-screen'); show('test-screen');
+    getEl('bg-layer').classList.add('bg-blurred');
+    
+    let pool = [];
+    if(pendingConfig.mode === 'level') {
+        let subQ = fullBank.filter(q => q.subject === pendingConfig.subject);
+        pool = subQ.slice((pendingConfig.level-1)*20, pendingConfig.level*20);
+    } else if(pendingConfig.mode === 'global_mixed') {
+        pool = shuffle([...fullBank]).slice(0, 20);
+    } else if(pendingConfig.mode === 'errors') {
+        let stats = JSON.parse(localStorage.getItem(`stats_${userName}`));
+        pool = fullBank.filter(q => stats.mistakes.includes(q.id));
+        pool = shuffle(pool).slice(0, 20);
+    } else if(pendingConfig.mode === 'exam') {
+        pool = shuffle([...fullBank]).slice(0, 60);
+        startTimer(3600); // 60 min
     }
+
+    if(testOptions.order === 'random' && pendingConfig.mode !== 'exam') pool = shuffle(pool);
     
-    pendingSubject = type;
-    showSetup(title);
-}
-
-function showSetup(title) {
-    document.getElementById('setup-title').innerText = title;
-    switchScreen('dashboard-screen', 'setup-screen');
-    if (pendingSubject === 'sequential') setOrder('sequential', document.querySelector('.order-seq'));
-    else setOrder('random', document.querySelector('.order-random'));
-}
-
-function setDifficulty(level, btn) {
-    document.querySelectorAll('.difficulty-control .seg-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    if(level === 'easy') diffTime = 1200; 
-    if(level === 'medium') diffTime = 900; 
-    if(level === 'hard') diffTime = 600; 
-}
-
-function setOrder(mode, btn) {
-    document.querySelectorAll('.order-opt').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    orderMode = mode;
-}
-
-// 60 talik imtihon rejimi
-function startExamMode() {
-    isExamMode = true;
-    let examPool = [];
-    const subjects = ['musiqa_nazariyasi', 'cholgu_ijrochiligi', 'vokal_ijrochiligi', 'metodika_repertuar'];
-    
-    subjects.forEach(sub => {
-       let subQ = bank.filter(q => q.subject === sub);
-       let shuffled = shuffleArray([...subQ]).slice(0, 15);
-       examPool = examPool.concat(shuffled);
+    // Test holatini yaratish
+    currentTest = pool.map(q => {
+        let opts = shuffle([...q.options]); // Doim variantlar aralashadi
+        return { ...q, options: opts };
     });
     
-    pendingPool = shuffleArray(examPool); // 60 ta global aralash
-    diffTime = 3600; // 60 daqiqa
-    orderMode = 'random'; 
-    confirmSetupAndStart(true);
+    startRound();
 }
 
-function confirmSetupAndStart(skipSetup = false) {
-    let selectedQs = [];
-    let count = isExamMode ? 60 : 20;
-    
-    // Savollar ketma-ketligi
-    let poolCopy = [...pendingPool];
-    if (orderMode === 'random') {
-        selectedQs = shuffleArray(poolCopy).slice(0, Math.min(count, poolCopy.length));
-    } else {
-        selectedQs = poolCopy.slice(0, Math.min(count, poolCopy.length)); 
-    }
-
-    // Variantlar DOIMO aralashtiriladi
-    currentTest = selectedQs.map(q => {
-        let correctText = q.options[q.answer];
-        let shuffledOpts = shuffleArray([...q.options]);
-        return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(correctText) };
-    });
-
-    if(!skipSetup) switchScreen('setup-screen', 'test-screen');
-    else switchScreen('dashboard-screen', 'test-screen');
-
-    initTestUI();
-}
-
-function initTestUI() {
-    document.getElementById('exit-test-btn').classList.remove('hidden');
-    document.getElementById('exam-timer').classList.remove('hidden');
-
+function startRound() {
     userAnswers = new Array(currentTest.length).fill(null);
     currentIndex = 0;
+    hasMadeMistake = false; // CRITICAL Reset
     
-    clearInterval(timerInterval);
-    startTimer(diffTime);
-    renderMap();
-    renderAllQuestions(); 
+    getEl('q-total').innerText = currentTest.length;
+    hide('finish-btn');
+    renderSlider();
+    renderQuestion();
 }
 
-function startTimer(seconds) {
-    let time = seconds;
-    document.getElementById('exam-timer').innerText = formatTime(time);
-    timerInterval = setInterval(() => {
-        time--;
-        document.getElementById('exam-timer').innerText = formatTime(time);
-        if (time <= 0) { clearInterval(timerInterval); finishExam(); }
+function startTimer(secs) {
+    show('exam-timer');
+    clearInterval(examTimer);
+    examTimer = setInterval(() => {
+        secs--;
+        let m = Math.floor(secs/60).toString().padStart(2,'0'), s = (secs%60).toString().padStart(2,'0');
+        getEl('exam-timer').innerText = `${m}:${s}`;
+        if(secs <= 0) { clearInterval(examTimer); checkFinalResult(); }
     }, 1000);
 }
 
-function formatTime(secs) {
-    let m = Math.floor(secs / 60), s = secs % 60;
-    return `${m}:${s < 10 ? '0'+s : s}`;
-}
-
-function renderAllQuestions() {
-    const area = document.getElementById('all-questions-area');
-    area.innerHTML = currentTest.map((q, idx) => `
-        <div class="q-block ${idx === currentIndex ? 'active-q' : 'blurred-q'}" id="q-block-${idx}">
-            <div class="q-meta">
-                Savol <span id="num-indicator-${idx}" class="q-num">${idx+1}</span> / ${currentTest.length}
-            </div>
-            <div class="q-text">${q.q}</div>
-            <div class="options-box" id="opts-${idx}">
-                ${q.options.map((opt, optIdx) => `
-                    <button class="option-btn" id="btn-${idx}-${optIdx}" onclick="checkAns(${idx}, ${optIdx})" ${userAnswers[idx] ? 'disabled' : ''}>
-                        ${opt}
-                    </button>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-    
-    updateMap();
-    scrollToActive();
-}
-
-function updateFocus() {
-    for(let i = 0; i < currentTest.length; i++) {
-        const block = document.getElementById(`q-block-${i}`);
-        if(block) {
-            if(i === currentIndex) {
-                block.classList.remove('blurred-q');
-                block.classList.add('active-q');
-                playSpinAnimation(i + 1, `num-indicator-${i}`); 
-            } else {
-                block.classList.remove('active-q');
-                block.classList.add('blurred-q');
-            }
-        }
-    }
-    scrollToActive();
-    updateMap();
-}
-
-// Roulette Spinner Animatsiyasi
-function playSpinAnimation(targetNum, elementId) {
-    let el = document.getElementById(elementId);
-    if(!el) return;
-    el.classList.add('spin-number');
-    let count = 0;
-    let interval = setInterval(() => {
-        el.innerText = Math.floor(Math.random() * currentTest.length) + 1;
-        count++;
-        if(count >= 6) {
-            clearInterval(interval);
-            el.innerText = targetNum;
-            el.classList.remove('spin-number');
-        }
-    }, 40);
-}
-
-function scrollToActive() {
-    // Mobil qurilmalarda ham silliq ishlashi uchun maxsus scroll mantiqi
-    const activeBlock = document.getElementById(`q-block-${currentIndex}`);
-    if (activeBlock) {
-        activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
-function checkAns(qIdx, optIdx) {
-    if (qIdx !== currentIndex || userAnswers[qIdx]) return;
-    
-    const isCorrect = optIdx === currentTest[qIdx].answer;
-    userAnswers[qIdx] = { selected: optIdx, isCorrect };
-    
-    let userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
-    const qId = currentTest[qIdx].id;
-    const clickedBtn = document.getElementById(`btn-${qIdx}-${optIdx}`);
-    
-    if (isCorrect) {
-        userDb.errors = userDb.errors.filter(id => id !== qId); 
-        if (!userDb.learned.includes(qId)) userDb.learned.push(qId);
-        clickedBtn.classList.add('magic-correct');
-    } else {
-        if (!userDb.errors.includes(qId)) userDb.errors.push(qId);
-        clickedBtn.classList.add('magic-wrong');
-        // Qat'iy talab: Xato bosilsa to'g'ri javob yashil ko'rsatilmaydi! (Esda qolishi uchun)
-    }
-    
-    localStorage.setItem(`stats_${currentUser}`, JSON.stringify(userDb));
-    updateStats();
-    
-    const options = document.getElementById(`opts-${qIdx}`).getElementsByTagName('button');
-    for(let btn of options) btn.disabled = true;
-
-    if (userAnswers.filter(a => a !== null).length === currentTest.length) {
-        document.getElementById('finish-btn').classList.remove('hidden');
-    }
-
-    // Keyingi savolga avtomat o'tish
-    setTimeout(() => { 
-        let next = userAnswers.findIndex(ans => ans === null); 
-        if (next !== -1) { currentIndex = next; updateFocus(); } 
-    }, 800);
-}
-
-function finishExam() {
-    clearInterval(timerInterval);
-    const correct = userAnswers.filter(a => a?.isCorrect).length;
-    let total = currentTest.length;
-    let percent = Math.round((correct / total) * 100);
-    
-    let msg, color;
-    if (percent === 100) {
-        msg = "Mukammal natija! Barcha savollarni to'g'ri topdingiz."; color = "var(--success)";
-    } else if (percent >= 70) {
-        msg = "Yaxshi harakat! Lekin 100% natija uchun yana mashq qilishingiz kerak."; color = "var(--warning)";
-    } else {
-        msg = "Natijangiz qoniqarsiz. Xatolar ustida ishlab, albatta qayta yechib ko'ring."; color = "var(--error)";
-    }
-
-    document.getElementById('donut-chart').style.setProperty('--percentage', `${percent}%`);
-    document.getElementById('donut-chart').style.setProperty('--exam-color', color);
-    document.getElementById('exam-percentage').innerText = `${percent}%`;
-    document.getElementById('exam-percentage').style.color = color;
-    
-    document.getElementById('exam-message').innerText = msg;
-    document.getElementById('exam-correct-count').innerText = correct;
-    document.getElementById('exam-total-count').innerText = total;
-
-    document.getElementById('exam-result-modal').classList.remove('hidden');
-}
-
-function restartCurrentTest() {
-    document.getElementById('exam-result-modal').classList.add('hidden');
-    confirmSetupAndStart(true); 
-}
-
-function renderMap() {
-    const map = document.getElementById('indicator-map');
-    map.innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}" onclick="goTo(${i})">${i+1}</div>`).join('');
-}
-
-function updateMap() {
-    let answered = userAnswers.filter(a => a !== null).length;
-    document.getElementById('progress-fill').style.width = `${(answered / currentTest.length) * 100}%`;
-    
-    let activeDot = null;
+// 5. Render va Mantiq
+function renderSlider() {
+    let dots = getEl('slider-dots'); dots.innerHTML = '';
     currentTest.forEach((_, i) => {
-        const dot = document.getElementById(`dot-${i}`);
-        if(dot) {
-            dot.className = 'dot';
-            if (i === currentIndex) { dot.classList.add('active-dot'); activeDot = dot; }
-            if (userAnswers[i]) dot.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong');
+        let d = document.createElement('div'); d.className = 'q-dot'; d.id = `dot-${i}`; d.innerText = i+1;
+        d.onclick = () => { currentIndex = i; renderQuestion(); };
+        dots.appendChild(d);
+    });
+}
+
+function renderQuestion() {
+    let qObj = currentTest[currentIndex];
+    
+    // Roulette animation
+    let rn = getEl('q-current-num');
+    rn.innerText = currentIndex + 1;
+    rn.classList.remove('spin'); void rn.offsetWidth; rn.classList.add('spin');
+
+    getEl('question-text').innerText = qObj.q;
+    let optBox = getEl('options-container'); optBox.innerHTML = '';
+    
+    let ansData = userAnswers[currentIndex];
+    
+    qObj.options.forEach(opt => {
+        let btn = document.createElement('button');
+        btn.className = 'opt-btn'; btn.innerText = opt;
+        
+        if(ansData) {
+            btn.disabled = true;
+            // CRITICAL RULE: To'g'ri javobni yashil qilib ko'rsatmaslik, faqat xatoni qizil qilish.
+            if(opt === ansData.selected) {
+                if(ansData.isCorrect) btn.classList.add('user-correct');
+                else btn.classList.add('user-wrong');
+            }
+        } else {
+            btn.onclick = () => selectAnswer(opt, btn);
         }
+        optBox.appendChild(btn);
     });
 
-    if (activeDot) {
-        setTimeout(() => {
-            activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }, 100);
-    }
+    // Slider va Progress yangilash
+    let answered = userAnswers.filter(a => a).length;
+    getEl('progress-bar').style.width = `${(answered/currentTest.length)*100}%`;
+    
+    document.querySelectorAll('.q-dot').forEach((d, i) => {
+        d.className = 'q-dot';
+        if(i === currentIndex) { d.classList.add('active'); d.scrollIntoView({behavior: 'smooth', inline: 'center'}); }
+        if(userAnswers[i]) d.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong');
+    });
+
+    if(answered === currentTest.length) show('finish-btn');
 }
 
-// Boshqaruv
-function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
-function goTo(i) { currentIndex = i; updateFocus(); }
-function move(step) { let n = currentIndex + step; if (n >= 0 && n < currentTest.length) { currentIndex = n; updateFocus(); } }
-
-function toggleTheme() { 
-    document.body.classList.toggle('dark-mode'); 
-    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
-}
-
-// Chiqishni tasdiqlash
-function exitToHome() {
-    if(confirm("Testni chindan ham yakunlamasdan chiqmoqchimisiz? Natijalaringiz saqlanmaydi.")) {
-        exitToDashboard();
-    }
-}
-
-function exitToDashboard() {
-    clearInterval(timerInterval);
-    document.getElementById('exam-result-modal').classList.add('hidden');
-    document.getElementById('exit-test-btn').classList.add('hidden');
-    document.getElementById('exam-timer').classList.add('hidden');
-    switchScreen('test-screen', 'dashboard-screen');
-    updateStats();
-}
-
-// Logo bosilganda qaytish
-function goHome() {
-    if(!document.getElementById('test-screen').classList.contains('hidden')) {
-        exitToHome(); // Agar test ichida bo'lsa, ogohlantirish chiqaradi
+function selectAnswer(selText, btnEl) {
+    let qObj = currentTest[currentIndex];
+    let isCorrect = (selText === qObj.answerText);
+    userAnswers[currentIndex] = { selected: selText, isCorrect: isCorrect };
+    
+    let stats = JSON.parse(localStorage.getItem(`stats_${userName}`)) || { mastered: [], mistakes: [] };
+    
+    if(isCorrect) {
+        btnEl.classList.add('user-correct');
+        if(!stats.mastered.includes(qObj.id)) stats.mastered.push(qObj.id);
+        stats.mistakes = stats.mistakes.filter(id => id !== qObj.id);
     } else {
-        document.querySelectorAll('.screen').forEach(s => s.classList.replace('active', 'hidden'));
-        document.getElementById('dashboard-screen').classList.replace('hidden', 'active');
+        btnEl.classList.add('user-wrong');
+        hasMadeMistake = true; // 100% logic trigger
+        if(!stats.mistakes.includes(qObj.id)) stats.mistakes.push(qObj.id);
+        stats.mastered = stats.mastered.filter(id => id !== qObj.id);
+    }
+    
+    localStorage.setItem(`stats_${userName}`, JSON.stringify(stats));
+    updateStatsUI();
+    
+    // Disable all
+    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    
+    // Auto next
+    setTimeout(() => { moveQ(1); }, 800);
+}
+
+function moveQ(step) {
+    let next = currentIndex + step;
+    if(next >= 0 && next < currentTest.length) { currentIndex = next; renderQuestion(); }
+    else {
+        let unans = userAnswers.findIndex(a => !a);
+        if(unans !== -1) { currentIndex = unans; renderQuestion(); }
     }
 }
 
-function switchScreen(hideId, showId) {
-    document.getElementById(hideId).classList.replace('active', 'hidden');
-    document.getElementById(showId).classList.replace('hidden', 'active');// Savollar blokini boshqarish
-let currentQuestions = [];
-let hasError = false;
-
-function startRound(questions) {
-    currentQuestions = questions; // 20 ta savol
-    hasError = false;
-    renderQuestion(0);
-}
-
-function handleAnswer(isCorrect) {
-    if (!isCorrect) {
-        hasError = true; // Bitta xato bo'lsa ham belgi qo'yiladi
+// 6. Yakunlash va 100% Mantiq
+function checkFinalResult() {
+    let correct = userAnswers.filter(a => a && a.isCorrect).length;
+    let perc = Math.round((correct / currentTest.length) * 100);
+    
+    if(pendingConfig.mode === 'exam') {
+        alert(`Imtihon yakunlandi!\nNatija: ${correct}/${currentTest.length} (${perc}%)`);
+        exitTest();
+        return;
     }
-    // ... keyingi savolga o'tish
-}
 
-function finishRound() {
-    if (hasError) {
-        alert("Xato bor! Ushbu 20 talikni boshidan boshlaysiz.");
-        startRound(currentQuestions); // Xato bo'lsa aynan shu blokni qaytarish
+    if(hasMadeMistake) {
+        alert(`Sizda xato bor! Natija: ${perc}%. Ushbu 20 talikni 100% o'zlashtirmaguningizcha almashtira olmaysiz. Qaytadan ishlang!`);
+        // Shuffle existing currentTest sequence if order is random
+        if(testOptions.order === 'random') currentTest = shuffle(currentTest);
+        startRound(); // Xuddi shu savollar boshidan beriladi
     } else {
-        alert("Ajoyib! 100% natija. Keyingi blokga o'tamiz.");
-        loadNextNewBatch(); // Faqat hammasi to'g'ri bo'lganda yangi savol berish
+        alert("MUKAMMAL! 100% natija. Endi keyingi blokka o'tishingiz mumkin.");
+        exitTest();
     }
 }
+
+function confirmExit() { if(confirm("Chindan ham chiqmoqchimisiz? Natijalar qisman saqlanadi.")) exitTest(); }
+function exitTest() {
+    clearInterval(examTimer); hide('exam-timer');
+    getEl('bg-layer').classList.remove('bg-blurred');
+    hide('test-screen'); show('dashboard-screen');
 }
