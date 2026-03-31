@@ -3,149 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Adham's Pro Exam System</title>
+    <title>Adham Quiz Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-mode" id="main-body">
-    
-    <div class="background-layer"></div>
-    <div class="background-overlay"></div>
+<body id="main-body" class="eye-comfort">
 
-    <nav class="global-nav hidden" id="global-nav">
-        <div class="logo-area" onclick="goHome()" title="Bosh sahifa">
-            <img src="logo.png" alt="Logo" class="nav-logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <span class="logo-text">PRO EXAM <span class="badge">v7.0</span></span>
-        </div>
-        <div class="nav-right">
-            <button id="exit-test-btn" class="exit-mini hidden" onclick="exitToHome()">🚪 Chiqish</button>
-            <div id="exam-timer" class="timer-badge hidden">15:00</div>
-            <button onclick="toggleTheme()" class="theme-btn" title="Tungi/Kungi rejim">🌗</button>
-        </div>
-    </nav>
+    <div id="bg-layer" class="bg-bino"></div>
 
-    <div id="welcome-screen" class="screen active">
-        <div class="hero-overlay">
-            <div class="hero-card glass-effect slide-up">
-                <div class="hero-badge">Professional Tayyorgarlik</div>
-                <h1 class="main-title">Muvaffaqiyatga Ilk Qadam!</h1>
-                <p class="hero-subtitle">
-                    Imtihon hayajonini unuting. Ushbu platforma sizning eng ishonchli najotingiz va shaxsiy trenejyoringizdir.<br><br>
-                    Savollarni yodlamang, ularni his qiling. Bizning maxsus algoritmimiz yordamida siz qisqa vaqt ichida 100% natijaga erishasiz. O'z ismingizni kiriting va g'alaba sari shoshiling!
-                </p>
-                
-                <div class="login-form mt-20">
-                    <input type="text" id="student-name" class="premium-input" placeholder="Ism va familiyangizni kiriting..." autocomplete="off">
-                    <button class="btn-start pulse" onclick="handleLogin()">Harakatni Boshlash 🚀</button>
-                </div>
-
-                <div class="social-links">
-                    <a href="https://t.me/atamuratovs" target="_blank" class="social-btn"><img src="tg.png" alt="TG" onerror="this.style.display='none'"></a>
-                    <a href="https://www.instagram.com/strovln" target="_blank" class="social-btn"><img src="insta.png" alt="IG" onerror="this.style.display='none'"></a>
-                </div>
+    <div id="welcome-screen" class="screen active fade-in">
+        <div class="glass-panel text-center">
+            <h1 class="pro-title">Assalomu alaykum!</h1>
+            <p class="welcome-desc">
+                Adham's Development taqdim etadi.<br>
+                Ushbu platforma DAK imtihonlariga professional darajada tayyorgarlik ko'rish uchun maxsus ishlab chiqilgan shaxsiy loyihadir. 
+                <br><br>
+                Maqsad — savollarni yodlash emas, 100% aniqlik bilan o'zlashtirish. Barcha qonun-qoidalar va test bazasi sizning muvaffaqiyatingiz uchun xizmat qiladi.
+            </p>
+            <div class="input-group mt-20">
+                <input type="text" id="student-name" class="premium-input" placeholder="Ismingizni kiriting..." autocomplete="off">
+                <p class="micro-text text-sec">Eslatma: Bu ism sizning natijalaringizni saqlab qolish uchun ishlatiladi.</p>
+                <button class="btn-primary pulse w-100 mt-10" onclick="enterDashboard()">Platformaga kirish</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboard-screen" class="screen hidden">
-        <div class="container main-content">
-            <header class="dash-header slide-up">
-                <h2>Salom, <span id="display-name" class="text-primary">Talaba</span>!</h2>
-                <div class="stats-row">
-                    <div class="stat-card">O'zlashtirildi: <b id="learned-count" class="text-success">0</b> <span class="max-total">/ 800</span></div>
-                    <div class="stat-card">Xatolar: <b id="error-count" class="text-error">0</b> <span class="max-total">/ 800</span></div>
-                </div>
-            </header>
+    <div id="dashboard-screen" class="screen hidden slide-in">
+        <div class="dash-header">
+            <h2>Salom, <span id="user-display" class="text-primary">Talaba</span>!</h2>
+            <div class="stats-row">
+                <div class="stat-card">O'zlashtirildi:<br><b id="learned-count" class="text-success">0</b> / 800</div>
+                <div class="stat-card">Xatolar:<br><b id="error-count" class="text-error">0</b> / 800</div>
+            </div>
+        </div>
 
-            <div class="category-grid slide-up">
-                <button class="cat-btn subject-btn" onclick="openLevelsModal('musiqa_nazariyasi', 'Musiqa nazariyasi')">🎼 Musiqa nazariyasi</button>
-                <button class="cat-btn subject-btn" onclick="openLevelsModal('cholgu_ijrochiligi', 'Cholg\'u ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
-                <button class="cat-btn subject-btn" onclick="openLevelsModal('vokal_ijrochiligi', 'Vokal ijrochiligi')">🎤 Vokal ijrochiligi</button>
-                <button class="cat-btn subject-btn" onclick="openLevelsModal('metodika_repertuar', 'Metodika')">📚 Metodika</button>
-                
-                <button class="cat-btn btn-special" onclick="openSetup('mixed', '1-800 Aralash')">🎲 1-800 Aralash</button>
-                <button id="error-work-btn" class="cat-btn btn-error" onclick="openSetup('errors', 'Xatolar ustida ishlash')">🛠 Xatolar ustida ishlash</button>
-                <button class="cat-btn btn-exam pulse" style="grid-column: 1 / -1;" onclick="startExamMode()">🎓 IMTIHON REJIMI (60 ta savol)</button>
+        <div class="glass-panel">
+            <h3 class="section-title">Fanlar (200 tadan)</h3>
+            <div class="category-grid">
+                <button class="cat-btn" onclick="openLevels('musiqa_nazariyasi', 'Musiqa nazariyasi')">Musiqa nazariyasi</button>
+                <button class="cat-btn" onclick="openLevels('cholgu_ijrochiligi', 'Cholg\'u ijrochiligi')">Cholg'u ijrochiligi</button>
+                <button class="cat-btn" onclick="openLevels('vokal_ijrochiligi', 'Vokal ijrochiligi')">Vokal ijrochiligi</button>
+                <button class="cat-btn" onclick="openLevels('metodika_repertuar', 'Metodika va Repertuar')">Metodika va Repertuar</button>
+            </div>
+
+            <h3 class="section-title mt-20">Maxsus Rejimlar</h3>
+            <div class="category-grid">
+                <button class="cat-btn btn-mixed" onclick="setupTest('global_mixed', '1-800 Aralash')">1-800 Aralash</button>
+                <button id="error-btn" class="cat-btn btn-error" onclick="setupTest('errors', 'Xatolar ustida ishlash')">Xatolar ustida ishlash</button>
+                <button class="cat-btn btn-exam pulse" style="grid-column: 1 / -1;" onclick="startExam()">Imtihon (60 ta savol)</button>
             </div>
         </div>
     </div>
 
     <div id="levels-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-effect slide-up">
-            <button class="modal-close" onclick="closeLevelsModal()">✖</button>
-            <h2 id="level-modal-title" class="modal-title">Fan nomi</h2>
-            <div id="levels-grid" class="levels-grid mt-20"></div>
+        <div class="modal-content glass-effect pop-up">
+            <h2 id="level-title" class="modal-title mb-15">Fan</h2>
+            <div id="levels-container" class="levels-grid"></div>
+            <button class="btn-outline w-100 mt-15" onclick="closeModal('levels-modal')">Orqaga</button>
         </div>
     </div>
 
-    <div id="setup-screen" class="screen hidden">
-        <div class="container setup-container">
-            <div class="setup-card glass-effect slide-up">
-                <h2 id="setup-title">⚙️ Test Parametrlari</h2>
-                
-                <div class="setup-group">
-                    <label>Qiyinlik darajasi:</label>
-                    <div class="segmented-control difficulty-control">
-                        <button class="seg-btn diff-easy active" onclick="setDifficulty('easy', this)">Oson</button>
-                        <button class="seg-btn diff-medium" onclick="setDifficulty('medium', this)">O'rtacha</button>
-                        <button class="seg-btn diff-hard" onclick="setDifficulty('hard', this)">Qiyin</button>
-                    </div>
+    <div id="setup-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-effect pop-up">
+            <h2 class="modal-title mb-15">Test Parametrlari</h2>
+            
+            <div class="setup-group">
+                <label class="text-sec">Qiyinlik darajasi (Rang):</label>
+                <div class="flex-row">
+                    <button class="diff-btn active" data-color="success" onclick="setDiff(this)">Oson</button>
+                    <button class="diff-btn" data-color="warning" onclick="setDiff(this)">O'rtacha</button>
+                    <button class="diff-btn" data-color="error" onclick="setDiff(this)">Qiyin</button>
                 </div>
+            </div>
 
-                <div class="setup-group">
-                    <label>Savollar tartibi:</label>
-                    <div class="segmented-control flex-col">
-                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 Random aralashtirish</button>
-                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ Ketma-ketlikda</button>
-                    </div>
+            <div class="setup-group mt-15">
+                <label class="text-sec">Savollar ketma-ketligi:</label>
+                <div class="flex-row">
+                    <button class="ord-btn active" data-order="random" onclick="setOrder(this)">Aralash</button>
+                    <button class="ord-btn" data-order="seq" onclick="setOrder(this)">Ketma-ket</button>
                 </div>
+                <p class="micro-text text-center mt-5">* Variantlar doimo aralashtiriladi.</p>
+            </div>
 
-                <div class="setup-actions">
-                    <button class="btn-cancel" onclick="goHome()">Orqaga</button>
-                    <button class="btn-start-test" onclick="confirmSetupAndStart()">Boshlash 🚀</button>
-                </div>
+            <div class="flex-row mt-20">
+                <button class="btn-outline flex-1" onclick="closeModal('setup-modal')">Orqaga</button>
+                <button class="btn-primary flex-1" onclick="launchTest()">Boshlash</button>
             </div>
         </div>
     </div>
 
     <div id="test-screen" class="screen hidden">
-        <div class="progress-bar-container"><div id="progress-fill"></div></div>
-        
-        <div class="container test-layout">
-            <div class="map-container" id="map-scroll-container">
-                <div id="indicator-map" class="mini-map"></div>
-            </div>
+        <div class="nav-bar">
+            <button class="btn-back" onclick="confirmExit()">🔙 Chiqish</button>
+            <div id="roulette-box" class="roulette"><span id="q-current-num">1</span> / <span id="q-total">20</span></div>
+            <div id="exam-timer" class="timer hidden">60:00</div>
+        </div>
 
-            <div class="question-container">
-                <div id="question-list-wrapper" class="q-list-wrapper">
-                    <div id="all-questions-area"></div>
-                    <div class="scroll-pad"></div> 
-                </div>
-                
-                <div class="nav-controls">
-                    <button class="nav-btn" onclick="move(-1)">⬅️ Oldingi</button>
-                    <button id="finish-btn" class="finish-btn hidden" onclick="finishExam()">Yakunlash ✔️</button>
-                    <button class="nav-btn" onclick="move(1)">Keyingi ➡️</button>
-                </div>
-            </div>
+        <div class="progress-wrap"><div id="progress-bar"></div></div>
+        <div class="slider-dots" id="slider-dots"></div>
+
+        <div class="test-area glass-panel mt-15">
+            <h3 id="question-text" class="q-text">Yuklanmoqda...</h3>
+            <div id="options-container" class="options-area"></div>
+        </div>
+
+        <div class="nav-controls mt-15">
+            <button class="nav-btn" onclick="moveQ(-1)">Oldingi</button>
+            <button id="finish-btn" class="btn-success hidden" onclick="checkFinalResult()">Yakunlash</button>
+            <button class="nav-btn" onclick="moveQ(1)">Keyingi</button>
         </div>
     </div>
 
-    <div id="exam-result-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-effect slide-up text-center">
-            <h2 class="modal-title mb-20">Natija</h2>
-            <div class="donut-wrapper">
-                <div id="donut-chart" class="donut-chart">
-                    <span id="exam-percentage">0%</span>
-                </div>
-            </div>
-            <h3 id="exam-message" class="exam-message"></h3>
-            <div class="exam-stats-details">
-                To'g'ri: <span id="exam-correct-count" class="text-success">0</span> / <span id="exam-total-count">0</span>
-            </div>
-            <div class="modal-actions mt-20">
-                <button class="btn-outline-modal" onclick="restartCurrentTest()">Qayta ishlash</button>
-                <button class="btn-start-test" onclick="exitToDashboard()">Dashboardga qaytish</button>
-            </div>
+    <div class="footer-area">
+        <div class="copyright">&copy; 2025-2026 Adhams copyright</div>
+        <div class="social-icons">
+            <a href="https://t.me/atamuratovs" target="_blank"><img src="tg.png" alt="Telegram"></a>
+            <a href="https://www.instagram.com/strovln" target="_blank"><img src="insta.png" alt="Instagram"></a>
         </div>
     </div>
 
