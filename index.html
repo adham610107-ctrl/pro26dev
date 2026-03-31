@@ -12,7 +12,7 @@
     <nav class="global-nav hidden" id="global-nav">
         <div class="logo-area" onclick="logout()" title="Tizimdan chiqish">
             <img src="logo.png" alt="Logo" class="nav-logo">
-            <span class="logo-text">PRO EXAM <span class="badge">v5.0</span></span>
+            <span class="logo-text">PRO EXAM <span class="badge">v5.5</span></span>
         </div>
         <div class="nav-right">
             <button id="exit-test-btn" class="exit-mini hidden" onclick="exitTest()">🚪 Chiqish</button>
@@ -21,6 +21,7 @@
         </div>
     </nav>
 
+    <!-- Welcome Screen -->
     <div id="welcome-screen" class="screen active">
         <div class="hero-bg"></div>
         <div class="hero-overlay">
@@ -28,11 +29,11 @@
                 <div class="hero-badge">Shaxsiy Loyiha</div>
                 <h1 class="main-title">Xush kelibsiz!</h1>
                 <p class="hero-subtitle">
-                    Bu sayt nima vazifani bajaradi? Ushbu platforma mening shaxsiy loyiham bo'lib, sizni yakuniy imtihonlarga mukammal tayyorlash, bilimlaringizni sinash va xatolar ustida mustaqil ishlash imkoniyatini beradi.<br><br>
-                    <b>Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi.</b>
+                    Ushbu platforma mening shaxsiy loyiham bo'lib, sizni sinovlarga mukammal tayyorlash, bilimlaringizni amalda tekshirish va xatolar ustida mustaqil ishlash imkoniyatini beradi.<br><br>
+                    <b>Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi.</b> Barcha ma'lumotlar, qonun-qoidalar va test bazasi sizning o'sishingiz uchun yo'naltirilgan.
                 </p>
                 <div class="rules-box">
-                    <p>✅ <b>Qoida:</b> 20 ta savolga 100% to'g'ri javob bermaguningizcha test yakunlanmaydi.</p>
+                    <p>✅ <b>Qoida:</b> Oddiy testlarda 100% to'g'ri javob topmaguningizcha test yakunlanmaydi.</p>
                     <p>✅ <b>Yashirin Javob:</b> Xato qilsangiz, to'g'ri javob ko'rsatilmaydi! Mustaqil izlab topishingiz zarur.</p>
                 </div>
                 
@@ -42,18 +43,15 @@
                 </div>
 
                 <div class="social-links">
-                    <a href="https://t.me/atamuratovs" target="_blank" class="social-btn">
-                        <img src="tg.png" alt="Telegram">
-                    </a>
-                    <a href="https://www.instagram.com/strovln" target="_blank" class="social-btn">
-                        <img src="insta.png" alt="Instagram">
-                    </a>
+                    <a href="https://t.me/atamuratovs" target="_blank" class="social-btn"><img src="tg.png" alt="Telegram"></a>
+                    <a href="https://www.instagram.com/strovln" target="_blank" class="social-btn"><img src="insta.png" alt="Instagram"></a>
                 </div>
             </div>
             <footer class="app-footer-welcome">Adham's copyright 2026 &copy;</footer>
         </div>
     </div>
 
+    <!-- Dashboard Screen -->
     <div id="dashboard-screen" class="screen hidden">
         <div class="container main-content">
             <header class="dash-header slide-up">
@@ -65,13 +63,15 @@
             </header>
 
             <div class="category-grid slide-up">
-                <button class="cat-btn" onclick="openSetup('musiqa_nazariyasi')">🎼 Musiqa nazariyasi</button>
-                <button class="cat-btn" onclick="openSetup('cholgu_ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
-                <button class="cat-btn" onclick="openSetup('vokal_ijrochiligi')">🎤 Vokal ijrochiligi</button>
-                <button class="cat-btn" onclick="openSetup('metodika_repertuar')">📚 Metodika</button>
-                <button class="cat-btn btn-special" onclick="openSetup('mixed')">🎲 1-800 Aralash</button>
+                <button class="cat-btn subject-btn" onclick="openLevelsModal('musiqa_nazariyasi', 'Musiqa nazariyasi')">🎼 Musiqa nazariyasi</button>
+                <button class="cat-btn subject-btn" onclick="openLevelsModal('cholgu_ijrochiligi', 'Cholg\'u ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
+                <button class="cat-btn subject-btn" onclick="openLevelsModal('vokal_ijrochiligi', 'Vokal ijrochiligi')">🎤 Vokal ijrochiligi</button>
+                <button class="cat-btn subject-btn" onclick="openLevelsModal('metodika_repertuar', 'Metodika')">📚 Metodika</button>
+                
+                <button class="cat-btn btn-special" onclick="openSetup('mixed', '1-800 Aralash')">🎲 1-800 Aralash</button>
                 <button class="cat-btn btn-outline" onclick="toggleChapters()">📑 Bo'limlar (1-800)</button>
-                <button id="error-work-btn" class="cat-btn btn-error" onclick="openSetup('errors')" disabled>🛠 Xatolar ustida ishlash</button>
+                <button id="error-work-btn" class="cat-btn btn-error" onclick="openSetup('errors', 'Xatolar ustida ishlash')" disabled>🛠 Xatolar ustida ishlash</button>
+                <button class="cat-btn btn-exam pulse" onclick="startExamMode()">🎓 IMTIHON (60 ta savol)</button>
             </div>
 
             <div id="chapters-grid" class="hidden chapters-box slide-up"></div>
@@ -79,10 +79,21 @@
         <footer class="app-footer">Adham's copyright 2026 &copy;</footer>
     </div>
 
+    <!-- Level Selection Modal -->
+    <div id="levels-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-effect slide-up">
+            <button class="modal-close" onclick="closeLevelsModal()">✖</button>
+            <h2 id="level-modal-title" class="modal-title">Fan nomi</h2>
+            <p class="modal-subtitle">Darajani tanlang (Har bir levelda 20 ta test)</p>
+            <div id="levels-grid" class="levels-grid"></div>
+        </div>
+    </div>
+
+    <!-- Setup Screen -->
     <div id="setup-screen" class="screen hidden">
         <div class="container setup-container">
             <div class="setup-card glass-effect slide-up">
-                <h2>⚙️ Test Parametrlari</h2>
+                <h2 id="setup-title">⚙️ Test Parametrlari</h2>
                 
                 <div class="setup-group">
                     <label>Qiyinlik darajasi (Vaqt):</label>
@@ -96,10 +107,10 @@
                 <div class="setup-group">
                     <label>Savollar tartibi:</label>
                     <div class="segmented-control order-control flex-col">
-                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 1-dan 20-gacha random almashtirish</button>
-                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ 1-dan 20-gacha ketma-ketlikda</button>
+                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 Savollarni random almashtirish</button>
+                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ Savollar ketma-ketlikda</button>
                     </div>
-                    <p class="small-note">*Eslatma: Variantlar (A, B, C, D) doim aralashtiriladi!</p>
+                    <p class="small-note">*Eslatma: Variantlar (A, B, C, D) har doim avtomatik random qilinadi!</p>
                 </div>
 
                 <div class="setup-actions">
@@ -111,11 +122,12 @@
         <footer class="app-footer">Adham's copyright 2026 &copy;</footer>
     </div>
 
+    <!-- Test Screen -->
     <div id="test-screen" class="screen hidden">
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
         
         <div class="container test-layout">
-            <div class="map-container">
+            <div class="map-container" id="map-scroll-container">
                 <div class="map-title only-pc">Savollar xaritasi</div>
                 <div id="indicator-map" class="mini-map"></div>
             </div>
@@ -123,7 +135,8 @@
             <div class="question-container">
                 <div id="question-list-wrapper" class="q-list-wrapper">
                     <div id="all-questions-area"></div>
-                    <div class="scroll-pad"></div> </div>
+                    <div class="scroll-pad"></div> 
+                </div>
                 
                 <div class="nav-controls">
                     <button class="nav-btn" onclick="move(-1)">⬅️ Oldingi</button>
@@ -131,6 +144,22 @@
                     <button class="nav-btn" onclick="move(1)">Keyingi ➡️</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Exam Result Modal -->
+    <div id="exam-result-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-effect slide-up text-center">
+            <h2 class="modal-title">Imtihon Yakunlandi!</h2>
+            <div class="exam-score-circle">
+                <span id="exam-percentage">0%</span>
+            </div>
+            <div id="exam-emoji" class="exam-emoji">😎</div>
+            <p id="exam-message" class="exam-message">Natija xabari</p>
+            <div class="exam-stats-details">
+                To'g'ri: <span id="exam-correct-count" class="text-success">0</span> / 60
+            </div>
+            <button class="btn-start-test pulse mt-20" onclick="exitTest()">Bosh sahifaga qaytish</button>
         </div>
     </div>
 
