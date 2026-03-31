@@ -40,21 +40,23 @@ async function loadData() {
                 bank.push({ ...q, id: `q_${globalIndex}`, subject, options: uniqueOpts, answer: newAnsIdx });
                 globalIndex++;
             });
-        } catch (e) { console.warn(f + " yuklanmadi. Serverda tekshiring."); }
+        } catch (e) { console.warn(f + " yuklanmadi. Fayllarni tekshiring."); }
     }
 }
 
 window.onload = async () => {
     await loadData();
-    // Tungi rejim (Eye comfort) by default CSS da. Agar light kerak bo'lsa o'zgartiradi.
+    // Default holat (Eye comfort - Dark mode) CSS orqali sozlangan. 
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.remove('dark-mode');
+    } else {
+        document.body.classList.add('dark-mode');
     }
 };
 
 function handleLogin() {
     const name = document.getElementById('student-name').value.trim();
-    if (name.length < 2) return alert("Ismingizni kiriting!");
+    if (name.length < 2) return alert("Iltimos, testni boshlash uchun ismingizni kiriting.");
     
     currentUser = name;
     document.getElementById('display-name').innerText = name;
@@ -64,49 +66,20 @@ function handleLogin() {
     document.getElementById('global-nav').classList.remove('hidden');
 }
 
-// O'zlashtirildi va Xatolar qat'iy 800 tadan hisoblanadi
 function updateStats() {
     let userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
     
     document.getElementById('learned-count').innerText = userDb.learned.length;
     document.getElementById('error-count').innerText = userDb.errors.length;
     
-    // Xatolar tugmasini bloklash / ochish
+    // Xatolar tugmasini faollashtirish/bloklash
     const errBtn = document.getElementById('error-work-btn');
     if(userDb.errors.length === 0) {
         errBtn.style.opacity = '0.5';
-        errBtn.onclick = () => alert("Sizda xatolar yo'q. Barakalla!");
+        errBtn.onclick = () => alert("Sizda xatolar yo'q. Ajoyib natija!");
     } else {
         errBtn.style.opacity = '1';
         errBtn.onclick = () => openSetup('errors', 'Xatolar ustida ishlash');
-    }
-}
-
-function toggleChapters() {
-    const grid = document.getElementById('chapters-grid');
-    grid.classList.toggle('hidden');
-    if(!grid.classList.contains('hidden')) renderChapterGrid();
-}
-
-function renderChapterGrid() {
-    const grid = document.getElementById('chapters-grid');
-    grid.innerHTML = '';
-    const userDb = JSON.parse(localStorage.getItem(`stats_${currentUser}`)) || { learned: [], errors: [] };
-
-    let totalChunks = Math.ceil(bank.length / 20);
-    for (let i = 0; i < totalChunks; i++) {
-        let start = i * 20;
-        let end = Math.min(start + 20, bank.length);
-        let chunk = bank.slice(start, end);
-        
-        let learnedInChunk = chunk.filter(q => userDb.learned.includes(q.id)).length;
-        let btn = document.createElement('button');
-        btn.className = 'chap-btn';
-        let progClass = learnedInChunk === chunk.length ? 'chap-prog full' : 'chap-prog';
-        btn.innerHTML = `${start + 1}-${end} <span class="${progClass}">${learnedInChunk}/${chunk.length}</span>`;
-        
-        btn.onclick = () => { pendingSubject = 'sequential'; pendingPool = chunk; showSetup(`Bo'lim: ${start+1}-${end}`); };
-        grid.appendChild(btn);
     }
 }
 
@@ -130,7 +103,7 @@ function openLevelsModal(subjectId, subjectName) {
         let btn = document.createElement('button');
         btn.className = 'level-btn';
         btn.innerHTML = `
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:10px;">
                 <span class="lvl-num">${i+1}</span>
                 <span>${start + 1}-${end}</span>
             </div>
@@ -158,7 +131,7 @@ function openSetup(type, title) {
     if (type === 'errors') {
         pendingPool = bank.filter(q => userDb.errors.includes(q.id));
     } else if (type === 'mixed') {
-        pendingPool = [...bank]; // 1-800
+        pendingPool = [...bank]; // Global aralash
     }
     
     pendingSubject = type;
@@ -186,7 +159,7 @@ function setOrder(mode, btn) {
     orderMode = mode;
 }
 
-// 8-tugma: 60 talik imtihon
+// 60 talik imtihon rejimi
 function startExamMode() {
     isExamMode = true;
     let examPool = [];
@@ -198,7 +171,7 @@ function startExamMode() {
        examPool = examPool.concat(shuffled);
     });
     
-    pendingPool = shuffleArray(examPool); // 60 ta aralashtirildi
+    pendingPool = shuffleArray(examPool); // 60 ta global aralash
     diffTime = 3600; // 60 daqiqa
     orderMode = 'random'; 
     confirmSetupAndStart(true);
@@ -208,7 +181,7 @@ function confirmSetupAndStart(skipSetup = false) {
     let selectedQs = [];
     let count = isExamMode ? 60 : 20;
     
-    // Faqat savollar ketma-ketligiga ta'sir qiladi!
+    // Savollar ketma-ketligi
     let poolCopy = [...pendingPool];
     if (orderMode === 'random') {
         selectedQs = shuffleArray(poolCopy).slice(0, Math.min(count, poolCopy.length));
@@ -216,7 +189,7 @@ function confirmSetupAndStart(skipSetup = false) {
         selectedQs = poolCopy.slice(0, Math.min(count, poolCopy.length)); 
     }
 
-    // Variantlar har doim aralashtiriladi
+    // Variantlar DOIMO aralashtiriladi
     currentTest = selectedQs.map(q => {
         let correctText = q.options[q.answer];
         let shuffledOpts = shuffleArray([...q.options]);
@@ -251,6 +224,7 @@ function startTimer(seconds) {
         if (time <= 0) { clearInterval(timerInterval); finishExam(); }
     }, 1000);
 }
+
 function formatTime(secs) {
     let m = Math.floor(secs / 60), s = secs % 60;
     return `${m}:${s < 10 ? '0'+s : s}`;
@@ -261,7 +235,7 @@ function renderAllQuestions() {
     area.innerHTML = currentTest.map((q, idx) => `
         <div class="q-block ${idx === currentIndex ? 'active-q' : 'blurred-q'}" id="q-block-${idx}">
             <div class="q-meta">
-                SAVOL <span id="num-indicator-${idx}" class="q-num">${idx+1}</span> / ${currentTest.length}
+                Savol <span id="num-indicator-${idx}" class="q-num">${idx+1}</span> / ${currentTest.length}
             </div>
             <div class="q-text">${q.q}</div>
             <div class="options-box" id="opts-${idx}">
@@ -285,7 +259,7 @@ function updateFocus() {
             if(i === currentIndex) {
                 block.classList.remove('blurred-q');
                 block.classList.add('active-q');
-                playSpinAnimation(i + 1, `num-indicator-${i}`); // Casino style spinner
+                playSpinAnimation(i + 1, `num-indicator-${i}`); 
             } else {
                 block.classList.remove('active-q');
                 block.classList.add('blurred-q');
@@ -296,7 +270,7 @@ function updateFocus() {
     updateMap();
 }
 
-// Rapid Spin Animation
+// Roulette Spinner Animatsiyasi
 function playSpinAnimation(targetNum, elementId) {
     let el = document.getElementById(elementId);
     if(!el) return;
@@ -305,17 +279,20 @@ function playSpinAnimation(targetNum, elementId) {
     let interval = setInterval(() => {
         el.innerText = Math.floor(Math.random() * currentTest.length) + 1;
         count++;
-        if(count >= 8) {
+        if(count >= 6) {
             clearInterval(interval);
             el.innerText = targetNum;
             el.classList.remove('spin-number');
         }
-    }, 30);
+    }, 40);
 }
 
 function scrollToActive() {
+    // Mobil qurilmalarda ham silliq ishlashi uchun maxsus scroll mantiqi
     const activeBlock = document.getElementById(`q-block-${currentIndex}`);
-    if (activeBlock) activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (activeBlock) {
+        activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 function checkAns(qIdx, optIdx) {
@@ -335,6 +312,7 @@ function checkAns(qIdx, optIdx) {
     } else {
         if (!userDb.errors.includes(qId)) userDb.errors.push(qId);
         clickedBtn.classList.add('magic-wrong');
+        // Qat'iy talab: Xato bosilsa to'g'ri javob yashil ko'rsatilmaydi! (Esda qolishi uchun)
     }
     
     localStorage.setItem(`stats_${currentUser}`, JSON.stringify(userDb));
@@ -347,10 +325,11 @@ function checkAns(qIdx, optIdx) {
         document.getElementById('finish-btn').classList.remove('hidden');
     }
 
+    // Keyingi savolga avtomat o'tish
     setTimeout(() => { 
         let next = userAnswers.findIndex(ans => ans === null); 
         if (next !== -1) { currentIndex = next; updateFocus(); } 
-    }, 600);
+    }, 800);
 }
 
 function finishExam() {
@@ -359,19 +338,15 @@ function finishExam() {
     let total = currentTest.length;
     let percent = Math.round((correct / total) * 100);
     
-    // Result logic
     let msg, color;
-    if (percent >= 90) {
-        msg = "Barakalla! Siz haqiqiy profisiz!"; color = "var(--success)";
+    if (percent === 100) {
+        msg = "Mukammal natija! Barcha savollarni to'g'ri topdingiz."; color = "var(--success)";
     } else if (percent >= 70) {
-        msg = "Yaxshi natija! Yana ozgina harakat qiling."; color = "var(--primary)";
-    } else if (percent >= 50) {
-        msg = "Yomon emas. Ko'rdingizmi, siz hali yana mashq qilishingiz kerak."; color = "var(--warning)";
+        msg = "Yaxshi harakat! Lekin 100% natija uchun yana mashq qilishingiz kerak."; color = "var(--warning)";
     } else {
-        msg = "Yana urinib ko'ring! Xatolar ustida albatta ishlang."; color = "var(--error)";
+        msg = "Natijangiz qoniqarsiz. Xatolar ustida ishlab, albatta qayta yechib ko'ring."; color = "var(--error)";
     }
 
-    // Donut chart update
     document.getElementById('donut-chart').style.setProperty('--percentage', `${percent}%`);
     document.getElementById('donut-chart').style.setProperty('--exam-color', color);
     document.getElementById('exam-percentage').innerText = `${percent}%`;
@@ -386,7 +361,7 @@ function finishExam() {
 
 function restartCurrentTest() {
     document.getElementById('exam-result-modal').classList.add('hidden');
-    confirmSetupAndStart(true); // Mavjud pendingPool bilan qayta ishga tushadi
+    confirmSetupAndStart(true); 
 }
 
 function renderMap() {
@@ -408,9 +383,10 @@ function updateMap() {
         }
     });
 
-    // Avtomatik scroll (qotib qolmasligi uchun)
     if (activeDot) {
-        activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        setTimeout(() => {
+            activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }, 100);
     }
 }
 
@@ -418,13 +394,20 @@ function updateMap() {
 function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
 function goTo(i) { currentIndex = i; updateFocus(); }
 function move(step) { let n = currentIndex + step; if (n >= 0 && n < currentTest.length) { currentIndex = n; updateFocus(); } }
+
 function toggleTheme() { 
     document.body.classList.toggle('dark-mode'); 
     localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
 }
 
-// Chiqish faqat bitta orqaga (Reload qilinmaydi)
+// Chiqishni tasdiqlash
 function exitToHome() {
+    if(confirm("Testni chindan ham yakunlamasdan chiqmoqchimisiz? Natijalaringiz saqlanmaydi.")) {
+        exitToDashboard();
+    }
+}
+
+function exitToDashboard() {
     clearInterval(timerInterval);
     document.getElementById('exam-result-modal').classList.add('hidden');
     document.getElementById('exit-test-btn').classList.add('hidden');
@@ -432,10 +415,17 @@ function exitToHome() {
     switchScreen('test-screen', 'dashboard-screen');
     updateStats();
 }
+
+// Logo bosilganda qaytish
 function goHome() {
-    document.getElementById('setup-screen').classList.replace('active', 'hidden');
-    document.getElementById('dashboard-screen').classList.replace('hidden', 'active');
+    if(!document.getElementById('test-screen').classList.contains('hidden')) {
+        exitToHome(); // Agar test ichida bo'lsa, ogohlantirish chiqaradi
+    } else {
+        document.querySelectorAll('.screen').forEach(s => s.classList.replace('active', 'hidden'));
+        document.getElementById('dashboard-screen').classList.replace('hidden', 'active');
+    }
 }
+
 function switchScreen(hideId, showId) {
     document.getElementById(hideId).classList.replace('active', 'hidden');
     document.getElementById(showId).classList.replace('hidden', 'active');
