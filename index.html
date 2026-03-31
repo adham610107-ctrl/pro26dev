@@ -3,154 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Adham's Pro Exam System</title>
+    <title>Adham's Music Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="eye-comfort-mode" id="main-body">
-    <div class="background-overlay"></div>
+<body class="dark-theme">
 
-    <nav class="global-nav hidden" id="global-nav">
-        <div class="logo-area" onclick="goHome()" title="Bosh sahifa">
-            <img src="logo.png" alt="Logo" class="nav-logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <span class="logo-text">PRO EXAM</span>
-        </div>
-        <div class="nav-right">
-            <button id="exit-test-btn" class="exit-mini hidden" onclick="confirmExit()">🚪 Chiqish</button>
-            <div id="exam-timer" class="timer-badge hidden">60:00</div>
-        </div>
-    </nav>
-
-    <div id="welcome-screen" class="screen active fade-in">
-        <div class="glass-panel welcome-panel">
-            <h1 class="pro-title">PRO TAYYORGARLIK TIZIMI</h1>
-            <p class="welcome-desc">
-                Imtihon stressini unuting. Bu oddiy test emas, balki sizni kafolatlangan muvaffaqiyatga olib chiquvchi shaxsiy trenejyoringiz. Har bir savol miyangizga chuqur o'rnashishi uchun maxsus algoritmlar bilan ishlangan.
+    <!-- 1. Kirish (Welcome Screen) -->
+    <div id="welcome-screen" class="screen active">
+        <div class="glass-bg"></div>
+        <div class="welcome-container slide-up">
+            <div class="premium-badge">PREMIUM TAYYORLOV</div>
+            <h1>Sizning Najotingiz — Bilimda!</h1>
+            <p class="intro-desc">
+                Bu platforma rasmiy universitet tizimi emas, balki sizning imtihon oldi **maxsus qalqoningizdir**. 
+                Bu yerda xato qilishdan qo'rqmang, chunki har bir xato — muvaffaqiyatga qo'yilgan qadamdir. 
+                Tayyormisiz? Kelajakni hozirdan boshlang.
             </p>
+            <div class="feature-pills">
+                <span>🔥 800+ Savol</span>
+                <span>⚡️ Real Rejim</span>
+                <span>🎯 Shaxsiy Analitika</span>
+            </div>
             <div class="input-group">
-                <input type="text" id="student-name" class="premium-input" placeholder="Ismingizni kiriting..." autocomplete="off">
-                <button class="btn-primary start-pulse" onclick="startApp()">Natijani Kafolatlash</button>
+                <input type="text" id="user-name" placeholder="Ismingizni kiriting..." maxlength="20">
+                <button class="btn-glow" onclick="startApp()">Platformaga Kirish</button>
             </div>
-            <div class="social-links-bottom">
-                <a href="#" class="social-btn"><img src="tg.png" alt="TG" onerror="this.style.display='none'"></a>
-                <a href="#" class="social-btn"><img src="insta.png" alt="IG" onerror="this.style.display='none'"></a>
-            </div>
-        </div>
-    </div>
-
-    <div id="dashboard-screen" class="screen hidden slide-in">
-        <div class="dashboard-header text-center">
-            <h2 id="greeting-name">Salom, Talaba</h2>
-            <div class="stats-container">
-                <div class="stat-card success-border">
-                    <span class="stat-value" id="stat-mastered">0/800</span>
-                    <span class="stat-label">O'zlashtirildi</span>
-                </div>
-                <div class="stat-card error-border">
-                    <span class="stat-value" id="stat-mistakes">0/800</span>
-                    <span class="stat-label">Xatolar ustida ishlash</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-panel menu-panel">
-            <h3 class="section-title">Fanlar (Level tizimi)</h3>
-            <div class="subject-grid">
-                <button class="btn-subject" onclick="openLevels('musiqa_nazariyasi')">Musiqa Nazariyasi</button>
-                <button class="btn-subject" onclick="openLevels('cholgu_ijrochiligi')">Cholg'u Ijrochiligi</button>
-                <button class="btn-subject" onclick="openLevels('vokal_ijrochiligi')">Vokal Ijrochiligi</button>
-                <button class="btn-subject" onclick="openLevels('metodika_repertuar')">Metodika va Repertuar</button>
-            </div>
-
-            <h3 class="section-title mt-20">Pro Rejimlar</h3>
-            <div class="pro-modes-grid">
-                <button class="btn-mode btn-mixed" onclick="setupTest('global_mixed')">1-800 Aralash</button>
-                <button class="btn-mode btn-mistake" onclick="startMistakes()">Xatolar ustida ishlash</button>
-                <button class="btn-mode btn-exam exam-pulse" onclick="startExam()">Imtihon (60 ta savol)</button>
+            <div class="social-footer">
+                <a href="#"><img src="tg.png" alt="TG"></a>
+                <a href="#"><img src="insta.png" alt="INSTA"></a>
             </div>
         </div>
     </div>
 
-    <div id="levels-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-effect pop-up">
-            <h2 class="modal-title mb-10" id="level-title">Fan nomi</h2>
-            <div class="levels-grid" id="levels-container">
+    <!-- 2. Asosiy Dashboard -->
+    <div id="main-dashboard" class="screen hidden">
+        <header class="pro-header">
+            <div class="user-info">
+                <img src="logo.png" class="mini-logo">
+                <span id="welcome-user">Talaba</span>
+            </div>
+            <button class="eye-btn" onclick="toggleEyeComfort()">👁️ Comfort</button>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="stats-grid">
+                <div class="stat-item green">
+                    <span class="label">O'zlashtirildi</span>
+                    <div class="val"><span id="learned-stat">0</span><small>/800</small></div>
                 </div>
-            <button class="btn-subject btn-mixed-sub mt-15" id="level-mixed-btn">Ushbu fandan aralash</button>
-            <button class="btn-outline-modal mt-10" onclick="closeModal('levels-modal')">Orqaga</button>
+                <div class="stat-item red">
+                    <span class="label">Xatolar</span>
+                    <div class="val"><span id="error-stat">0</span><small>/800</small></div>
+                </div>
+            </div>
+
+            <div class="category-grid">
+                <button class="cat-card" onclick="openSubject('musiqa_nazariyasi')">🎼 Musiqa nazariyasi</button>
+                <button class="cat-card" onclick="openSubject('cholgu_ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
+                <button class="cat-card" onclick="openSubject('vokal_ijrochiligi')">🎤 Vokal ijrochiligi</button>
+                <button class="cat-card" onclick="openSubject('metodika_repertuar')">📚 Metodika</button>
+                
+                <div class="extra-tools">
+                    <button class="tool-btn mix" onclick="startSpecialMode('all-mixed')">🔄 1-800 Aralash</button>
+                    <button class="tool-btn err" id="fix-errors-btn" onclick="startSpecialMode('errors')">🛠 Xatolar ustida ishlash</button>
+                    <button class="tool-btn exam pulse" onclick="startExam60()">🎓 IMTIHON REJIMI (60)</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 3. Level Tanlash (Modern Bottom Sheet) -->
+    <div id="level-modal" class="modal hidden">
+        <div class="modal-blur" onclick="closeModal()"></div>
+        <div class="modal-content slide-up">
+            <h2 id="modal-title">Bosqichni tanlang</h2>
+            <div class="difficulty-selectors">
+                <button class="diff-btn easy" onclick="setDiff('easy')">Oson</button>
+                <button class="diff-btn medium" onclick="setDiff('medium')">O'rtacha</button>
+                <button class="diff-btn hard" onclick="setDiff('hard')">Qiyin</button>
+            </div>
+            <div id="levels-list" class="levels-grid"></div>
+            <button class="btn-sub-mix" onclick="startSubMixed()">🔄 Fan bo'yicha aralash (200)</button>
         </div>
     </div>
 
-    <div id="setup-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-effect pop-up">
-            <h2 class="modal-title mb-10">Test Sozlamalari</h2>
-            
-            <div class="config-section">
-                <span class="config-label">Qiyinlik darajasi</span>
-                <div class="config-group">
-                    <button class="config-btn diff-btn diff-easy" onclick="selectDiff(this, 'oson')">Oson</button>
-                    <button class="config-btn diff-btn diff-mid active" onclick="selectDiff(this, 'orta')">O'rtacha</button>
-                    <button class="config-btn diff-btn diff-hard" onclick="selectDiff(this, 'qiyin')">Qiyin</button>
-                </div>
-            </div>
-
-            <div class="config-section">
-                <span class="config-label">Savollar tartibi</span>
-                <div class="config-group">
-                    <button class="config-btn ord-btn active" onclick="selectOrder(this, 'ketma-ket')">Ketma-ket</button>
-                    <button class="config-btn ord-btn" onclick="selectOrder(this, 'random')">Aralash</button>
-                </div>
-            </div>
-            <p class="micro-text text-center text-sec">* Variantlar doimo aralashib tushadi.</p>
-
-            <div class="modal-actions mt-20">
-                <button class="btn-primary w-100" onclick="launchTest()">Boshlash</button>
-                <button class="btn-outline-modal w-100 mt-10" onclick="closeModal('setup-modal')">Orqaga</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- 4. Test Oynasi -->
     <div id="test-screen" class="screen hidden">
-        <div class="test-container glass-panel">
-            <div class="roulette-wrapper">
-                <div id="q-roulette" class="roulette-number">1</div>
-                <span class="roulette-total">/ <span id="q-total-count">20</span></span>
-            </div>
+        <div class="test-top">
+            <button class="back-btn" onclick="backOneStep()">← Chiqish</button>
+            <div id="exam-timer" class="timer-badge hidden">60:00</div>
+            <div class="progress-percent" id="current-percent">0%</div>
+        </div>
 
-            <div class="q-slider-container">
-                <div class="q-slider" id="q-slider"></div>
-            </div>
+        <!-- Savol Indikatori (Spin Wheel integratsiyasi bilan) -->
+        <div class="indicator-container">
+            <div id="indicator-track" class="indicator-track"></div>
+        </div>
 
-            <div class="question-area">
-                <h3 id="question-text" class="q-text">Savol yuklanmoqda...</h3>
+        <div class="question-container glass-effect">
+            <div class="q-header">
+                <div id="q-number" class="number-roll">1</div>
+                <p id="q-text">Savol yuklanmoqda...</p>
             </div>
+            <div id="options-box" class="options-stack"></div>
+        </div>
 
-            <div class="options-area" id="options-container"></div>
-            
-            <div id="feedback-text" class="feedback-text hidden"></div>
-
-            <div class="nav-controls mt-20">
-                <button class="nav-btn" onclick="move(-1)">Oldingi</button>
-                <button id="finish-btn" class="btn-primary hidden" onclick="finishTest()">Yakunlash</button>
-                <button class="nav-btn" onclick="move(1)">Keyingi</button>
-            </div>
+        <div class="test-controls">
+            <button class="nav-btn" onclick="prevQ()">Oldingi</button>
+            <button class="nav-btn next" onclick="nextQ()">Keyingi</button>
         </div>
     </div>
 
-    <div id="result-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-effect pop-up text-center">
-            <h2 class="modal-title mb-10">Natija</h2>
-            
-            <div class="donut-wrapper">
-                <div id="donut-chart" class="donut-chart">
-                    <span id="result-percent">0%</span>
-                </div>
+    <!-- 5. Natija (Creative Bonus) -->
+    <div id="result-screen" class="modal hidden">
+        <div class="result-card glass-card">
+            <div class="chart-box">
+                <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path id="result-stroke" class="circle" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <text x="18" y="20.35" class="perc-text" id="final-res-text">0%</text>
+                </svg>
             </div>
-            
-            <h3 id="result-message" class="result-message mt-15"></h3>
-            <p id="result-sub-message" class="result-sub-message text-sec"></p>
-            
-            <div class="modal-actions mt-20">
-                <button class="btn-primary w-100" onclick="exitToDashboard()">Tushunarli, Davom etish</button>
+            <h2 id="res-title">Ajoyib!</h2>
+            <p id="res-motivation">Siz bugun kechagidan yaxshiroqsiz!</p>
+            <div class="res-buttons">
+                <button class="btn-glow" onclick="restartCurrent()">Qayta urinish</button>
+                <button class="btn-outline" onclick="exitToHome()">Asosiy sahifa</button>
             </div>
         </div>
     </div>
