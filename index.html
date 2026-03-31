@@ -6,12 +6,15 @@
     <title>Adham's Pro Exam System</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-mode" id="main-body"> <!-- Default Eye Comfort -->
+<body class="dark-mode" id="main-body">
+    
+    <div class="background-layer"></div>
+    <div class="background-overlay"></div>
 
     <nav class="global-nav hidden" id="global-nav">
         <div class="logo-area" onclick="goHome()" title="Bosh sahifa">
             <img src="logo.png" alt="Logo" class="nav-logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <span class="logo-text">PRO EXAM <span class="badge">v6.0</span></span>
+            <span class="logo-text">PRO EXAM <span class="badge">v7.0</span></span>
         </div>
         <div class="nav-right">
             <button id="exit-test-btn" class="exit-mini hidden" onclick="exitToHome()">🚪 Chiqish</button>
@@ -20,21 +23,19 @@
         </div>
     </nav>
 
-    <!-- Welcome Screen -->
     <div id="welcome-screen" class="screen active">
-        <div class="hero-bg"></div>
         <div class="hero-overlay">
             <div class="hero-card glass-effect slide-up">
-                <div class="hero-badge">Shaxsiy Loyiha</div>
-                <h1 class="main-title">Xush kelibsiz!</h1>
+                <div class="hero-badge">Professional Tayyorgarlik</div>
+                <h1 class="main-title">Muvaffaqiyatga Ilk Qadam!</h1>
                 <p class="hero-subtitle">
-                    Ushbu platforma mening shaxsiy loyiham bo'lib, sizni sinovlarga mukammal tayyorlash va bilimlaringizni amalda tekshirish imkoniyatini beradi.<br><br>
-                    <b>Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi.</b> Barcha qonun-qoidalar va test bazasi sizning o'sishingiz uchun yo'naltirilgan.
+                    Imtihon hayajonini unuting. Ushbu platforma sizning eng ishonchli najotingiz va shaxsiy trenejyoringizdir.<br><br>
+                    Savollarni yodlamang, ularni his qiling. Bizning maxsus algoritmimiz yordamida siz qisqa vaqt ichida 100% natijaga erishasiz. O'z ismingizni kiriting va g'alaba sari shoshiling!
                 </p>
                 
                 <div class="login-form mt-20">
-                    <input type="text" id="student-name" class="premium-input" placeholder="Ismingizni kiriting..." autocomplete="off">
-                    <button class="btn-start pulse" onclick="handleLogin()">Platformaga kirish</button>
+                    <input type="text" id="student-name" class="premium-input" placeholder="Ism va familiyangizni kiriting..." autocomplete="off">
+                    <button class="btn-start pulse" onclick="handleLogin()">Harakatni Boshlash 🚀</button>
                 </div>
 
                 <div class="social-links">
@@ -45,7 +46,6 @@
         </div>
     </div>
 
-    <!-- Dashboard Screen -->
     <div id="dashboard-screen" class="screen hidden">
         <div class="container main-content">
             <header class="dash-header slide-up">
@@ -63,16 +63,12 @@
                 <button class="cat-btn subject-btn" onclick="openLevelsModal('metodika_repertuar', 'Metodika')">📚 Metodika</button>
                 
                 <button class="cat-btn btn-special" onclick="openSetup('mixed', '1-800 Aralash')">🎲 1-800 Aralash</button>
-                <button class="cat-btn btn-outline" onclick="toggleChapters()">📑 Bo'limlar (1-800)</button>
                 <button id="error-work-btn" class="cat-btn btn-error" onclick="openSetup('errors', 'Xatolar ustida ishlash')">🛠 Xatolar ustida ishlash</button>
-                <button class="cat-btn btn-exam pulse" onclick="startExamMode()">🎓 IMTIHON (60 ta savol)</button>
+                <button class="cat-btn btn-exam pulse" style="grid-column: 1 / -1;" onclick="startExamMode()">🎓 IMTIHON REJIMI (60 ta savol)</button>
             </div>
-
-            <div id="chapters-grid" class="hidden chapters-box slide-up"></div>
         </div>
     </div>
 
-    <!-- Level Selection Modal -->
     <div id="levels-modal" class="modal-overlay hidden">
         <div class="modal-content glass-effect slide-up">
             <button class="modal-close" onclick="closeLevelsModal()">✖</button>
@@ -81,14 +77,13 @@
         </div>
     </div>
 
-    <!-- Setup Screen -->
     <div id="setup-screen" class="screen hidden">
         <div class="container setup-container">
             <div class="setup-card glass-effect slide-up">
                 <h2 id="setup-title">⚙️ Test Parametrlari</h2>
                 
                 <div class="setup-group">
-                    <label>Qiyinlik darajasi (Vaqt):</label>
+                    <label>Qiyinlik darajasi:</label>
                     <div class="segmented-control difficulty-control">
                         <button class="seg-btn diff-easy active" onclick="setDifficulty('easy', this)">Oson</button>
                         <button class="seg-btn diff-medium" onclick="setDifficulty('medium', this)">O'rtacha</button>
@@ -99,8 +94,8 @@
                 <div class="setup-group">
                     <label>Savollar tartibi:</label>
                     <div class="segmented-control flex-col">
-                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 1-20 random almashtirish</button>
-                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ 1-20 ketma-ketlikda</button>
+                        <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 Random aralashtirish</button>
+                        <button class="seg-btn order-opt order-seq" onclick="setOrder('sequential', this)">⬇️ Ketma-ketlikda</button>
                     </div>
                 </div>
 
@@ -112,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Test Screen -->
     <div id="test-screen" class="screen hidden">
         <div class="progress-bar-container"><div id="progress-fill"></div></div>
         
@@ -136,26 +130,21 @@
         </div>
     </div>
 
-    <!-- Minimalist Circular Result Modal -->
     <div id="exam-result-modal" class="modal-overlay hidden">
         <div class="modal-content glass-effect slide-up text-center">
             <h2 class="modal-title mb-20">Natija</h2>
-            
             <div class="donut-wrapper">
                 <div id="donut-chart" class="donut-chart">
                     <span id="exam-percentage">0%</span>
                 </div>
             </div>
-            
-            <h3 id="exam-message" class="exam-message">Xabar</h3>
-            
+            <h3 id="exam-message" class="exam-message"></h3>
             <div class="exam-stats-details">
                 To'g'ri: <span id="exam-correct-count" class="text-success">0</span> / <span id="exam-total-count">0</span>
             </div>
-            
             <div class="modal-actions mt-20">
-                <button class="btn-outline-modal" onclick="restartCurrentTest()">Boshqatdan yechish</button>
-                <button class="btn-start-test" onclick="exitToHome()">Chiqib ketish</button>
+                <button class="btn-outline-modal" onclick="restartCurrentTest()">Qayta ishlash</button>
+                <button class="btn-start-test" onclick="exitToDashboard()">Dashboardga qaytish</button>
             </div>
         </div>
     </div>
