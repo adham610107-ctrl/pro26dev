@@ -1,12 +1,22 @@
+// ==========================================
+// MAGIC GHOSTBUSTER: Barcha "Arvoh" oynalarni tozalash
+// ==========================================
+function forceCloseAllModals() {
+    // Ekranda qancha modal bo'lsa, hammasini shafqatsizlarcha yopadi
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.style.display = 'none';
+    });
+}
+
 // --- Day/Night Eye Comfort ---
 function toggleTheme() {
     document.body.classList.toggle('light-mode');
 }
 
-// --- 3D Hover Magic (Faqat PC da seziladi) ---
+// --- 3D Hover Magic ---
 document.addEventListener('mousemove', (e) => {
     const card = document.getElementById('question-card');
-    if(document.getElementById('screen-test').classList.contains('active')) {
+    if(document.getElementById('screen-test').classList.contains('active') && card) {
         let xAxis = (window.innerWidth / 2 - e.pageX) / 40;
         let yAxis = (window.innerHeight / 2 - e.pageY) / 40;
         card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
@@ -82,6 +92,7 @@ window.onload = loadData;
 
 // --- 2. Screens ---
 function switchScreen(hideId, showId) {
+    forceCloseAllModals(); // Ekran almashganda qat'iy tozalash!
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(showId).classList.add('active');
 }
@@ -91,7 +102,12 @@ function login() {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     switchScreen('screen-welcome', 'screen-dash');
 }
-function goHome() { clearInterval(timerInterval); document.getElementById('modal-result').style.display = 'none'; switchScreen('screen-test', 'screen-dash'); updateDashboardStats(); }
+function goHome() { 
+    clearInterval(timerInterval); 
+    forceCloseAllModals();
+    switchScreen('screen-test', 'screen-dash'); 
+    updateDashboardStats(); 
+}
 function confirmExit() { if(confirm("Testdan chiqishni xohlaysizmi?")) goHome(); }
 function updateDashboardStats() {
     let l = document.getElementById('dash-learned'); if(l) l.innerText = stats.learned.length;
@@ -101,6 +117,7 @@ function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).
 
 // --- 3. Levels & Chapters ---
 function openLevels(sub, title) {
+    forceCloseAllModals();
     pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
     const grid = document.getElementById('level-grid-box'); grid.innerHTML = '';
     let subQs = bank.filter(q => q.subject === sub);
@@ -116,6 +133,7 @@ function openLevels(sub, title) {
 }
 
 function openChapters() {
+    forceCloseAllModals();
     const grid = document.getElementById('chapters-grid-box'); grid.innerHTML = '';
     const cleanBank = [...bank].sort((a,b) => a.id - b.id);
     const chunks = Math.ceil(cleanBank.length / 20);
@@ -133,13 +151,13 @@ function openChapters() {
 }
 
 function prepareTest(type) {
-    if (type === 'errors' && stats.errors.length === 0) return alert("Sizda hozircha xatolar yo'q. Barakalla!");
+    forceCloseAllModals(); // "Fandan Aralash" bosilganda qat'iy yopish
+    if (type === 'errors' && stats.errors.length === 0) return alert("Sizda xatolar yo'q. Barakalla!");
     testType = type; openSetup();
 }
 
-// 🎯 MAGIC FIX: Barcha modal oynalarni tozalab, keyin Setupni ochish
 function openSetup() { 
-    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    forceCloseAllModals(); // Sozlamalar ochilishidan oldin tozalash
     document.getElementById('modal-setup').style.display = 'flex'; 
 }
 
@@ -150,8 +168,7 @@ function setDifficulty(btn) {
 
 // --- 4. Test Logic ---
 function applySetup(order) {
-    // 🎯 MAGIC FIX: Test boshlanganda oynani to'liq yopamiz
-    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    forceCloseAllModals(); // Test boshlanayotganda hammasini o'chirish
     isExamMode = false;
     let pool = []; 
     let cleanBank = [...bank].sort((a,b) => a.id - b.id);
@@ -162,12 +179,13 @@ function applySetup(order) {
     else if(testType === 'sub_mix') pool = cleanBank.filter(q => q.subject === pendingSubject).sort(() => Math.random()-0.5).slice(0, 20);
     
     if(order === 'rand') pool = pool.sort(() => Math.random() - 0.5);
-    else pool = pool.sort((a,b) => a.id - b.id); // Ketma-ketlik kafolati
+    else pool = pool.sort((a,b) => a.id - b.id);
 
     currentTest = pool; startTestSession();
 }
 
 function startExamMode() {
+    forceCloseAllModals();
     testType = 'exam'; isExamMode = true; let examQs = [];
     const subjects = ['musiqa_nazariyasi', 'cholgu_ijrochiligi', 'vokal_ijrochiligi', 'metodika_repertuar'];
     subjects.forEach(sub => { let sQs = bank.filter(q => q.subject === sub).sort(() => Math.random() - 0.5).slice(0, 15); examQs = examQs.concat(sQs); });
@@ -223,7 +241,7 @@ function selectAnswer(selectedIdx, btnEl, event) {
         btnEl.style.background = 'var(--success)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--success)';
         btnEl.style.boxShadow = '0 0 20px rgba(50, 215, 75, 0.5)';
         dot.classList.add('correct'); playFeedback('correct');
-        createParticles(event.clientX, event.clientY); // MAGIC PARTICLES
+        createParticles(event.clientX, event.clientY);
         if(!stats.learned.includes(q.id)) stats.learned.push(q.id);
         stats.errors = stats.errors.filter(id => id !== q.id); 
     } else {
@@ -238,4 +256,21 @@ function selectAnswer(selectedIdx, btnEl, event) {
 function showResult() {
     clearInterval(timerInterval);
     let correctCount = currentTest.filter(q => q.userAns === true).length;
-    let percent
+    let percent = Math.round((correctCount / currentTest.length) * 100);
+    document.getElementById('result-percent').innerText = `${percent}%`;
+    
+    let msg = "", color = "";
+    if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; }
+    else if(percent >= 70) { msg = "Yaxshi natija, lekin biroz mashq qiling. 👍"; color = "var(--primary)"; }
+    else if(percent >= 50) { msg = "Ko'rdingizmi? Yana urinib ko'ring! 📚"; color = "var(--warning)"; }
+    else { msg = "Ko'proq mashq kerak! Xatolar ustida ishlang. ⚠️"; color = "var(--error)"; }
+
+    document.getElementById('result-msg').innerText = msg;
+    document.getElementById('result-donut').style.borderColor = color;
+    document.getElementById('result-donut').style.boxShadow = `0 0 30px ${color}`;
+    document.getElementById('result-percent').style.color = color;
+    document.getElementById('result-percent').style.textShadow = `0 0 15px ${color}`;
+    
+    forceCloseAllModals(); // Natija chiqishidan oldin ham tozalaymiz
+    document.getElementById('modal-result').style.display = 'flex';
+}
