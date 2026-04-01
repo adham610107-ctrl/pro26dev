@@ -1,52 +1,11 @@
 // ==========================================
-// MAGIC GHOSTBUSTER: Barcha "Arvoh" oynalarni tozalash
+// AUDIO, VIBRATION & PARTICLES (MAGIC TRICKS)
 // ==========================================
-function forceCloseAllModals() {
-    // Ekranda qancha modal bo'lsa, hammasini shafqatsizlarcha yopadi
-    document.querySelectorAll('.modal-overlay').forEach(modal => {
-        modal.style.display = 'none';
-    });
-}
-
-// --- Day/Night Eye Comfort ---
-function toggleTheme() {
-    document.body.classList.toggle('light-mode');
-}
-
-// --- 3D Hover Magic ---
-document.addEventListener('mousemove', (e) => {
-    const card = document.getElementById('question-card');
-    if(document.getElementById('screen-test').classList.contains('active') && card) {
-        let xAxis = (window.innerWidth / 2 - e.pageX) / 40;
-        let yAxis = (window.innerHeight / 2 - e.pageY) / 40;
-        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-    }
-});
-
-// --- Magic Particle Burst ---
-function createParticles(x, y) {
-    for (let i = 0; i < 12; i++) {
-        let p = document.createElement('div');
-        p.className = 'magic-particle';
-        document.body.appendChild(p);
-        let destX = x + (Math.random() - 0.5) * 120;
-        let destY = y + (Math.random() - 0.5) * 120;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
-        p.animate([
-            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-            { transform: `translate(${destX - x}px, ${destY - y}px) scale(0)`, opacity: 0 }
-        ], { duration: 600, easing: 'ease-out' });
-        setTimeout(() => p.remove(), 600);
-    }
-}
-
-// --- Audio & Vibration ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playFeedback(type) {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
-    
     if(type === 'correct') {
         osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
@@ -62,14 +21,42 @@ function playFeedback(type) {
     }
 }
 
-// --- Global Vars ---
-let bank = []; 
-let currentTest = []; let currentIdx = 0;
-let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
-let timerInterval; let pendingSubject = null; let pendingLevelQs = [];
-let isExamMode = false; let testType = null;
+function createParticles(event) {
+    if(!event) return;
+    const x = event.clientX; const y = event.clientY;
+    for (let i = 0; i < 12; i++) {
+        let p = document.createElement('div'); p.className = 'magic-particle'; document.body.appendChild(p);
+        let destX = x + (Math.random() - 0.5) * 120; let destY = y + (Math.random() - 0.5) * 120;
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: `translate(${destX - x}px, ${destY - y}px) scale(0)`, opacity: 0 }
+        ], { duration: 600, easing: 'ease-out' });
+        setTimeout(() => p.remove(), 600);
+    }
+}
 
-// --- 1. Load Data ---
+// ==========================================
+// GHOSTBUSTER (Tozalash)
+// ==========================================
+function forceCloseAllModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+}
+function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
+function closeModalDirect(id) { document.getElementById(id).style.display = 'none'; }
+
+// ==========================================
+// GLOBAL VARIABLES
+// ==========================================
+let bank = []; let currentTest = []; let userAnswers = []; let currentIndex = 0;
+let currentUser = null; let timerInterval;
+let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
+let pendingSubject = null; let pendingLevelQs = []; let testType = null;
+let diffTime = 900; let orderMode = 'random'; let isExamMode = false;
+
+// ==========================================
+// 1. DATA YUKLASH
+// ==========================================
 async function loadData() {
     const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
     let globalId = 1;
@@ -78,54 +65,80 @@ async function loadData() {
             const res = await fetch(f); const data = await res.json();
             const subName = f.replace('.json', '');
             data.forEach(q => {
-                let opts = q.options.filter(o => o !== null && o.toString().trim() !== '');
-                let correctText = q.options[q.answer]; 
-                if(opts.length === 3) opts.push("Barcha javoblar to'g'ri");
-                bank.push({ id: globalId++, subject: subName, q: q.q, originalOpts: opts, correctText: correctText });
+                let opts = q.options.filter(o => o !== null && o !== undefined && o.toString().trim() !== '');
+                let uniqueOpts = [...new Set(opts)];
+                let correctText = q.options[q.answer];
+                if(uniqueOpts.length === 3) uniqueOpts.push("Barcha javoblar to'g'ri");
+                
+                bank.push({ id: globalId++, subject: subName, q: q.q, originalOpts: uniqueOpts, correctText: correctText });
             });
-        } catch(e) { console.warn(f + " yuklanmadi."); }
+        } catch(e) { console.warn(f + " topilmadi"); }
     }
-    document.getElementById('dash-learned').parentNode.innerHTML = `✅ <span id="dash-learned">${stats.learned.length}</span> / ${bank.length}`;
+    document.getElementById('max-learned-total').innerText = `/ ${bank.length}`;
     updateDashboardStats();
 }
-window.onload = loadData;
+window.onload = () => {
+    loadData();
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.replace('light-mode', 'dark-mode');
+};
 
-// --- 2. Screens ---
-function switchScreen(hideId, showId) {
-    forceCloseAllModals(); // Ekran almashganda qat'iy tozalash!
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(showId).classList.add('active');
+// ==========================================
+// 2. EKRANLAR VA MENYU BOSHQRUVI
+// ==========================================
+function toggleTheme() { 
+    let isDark = document.body.classList.contains('dark-mode');
+    if(isDark) { document.body.classList.replace('dark-mode', 'light-mode'); localStorage.setItem('theme', 'light'); }
+    else { document.body.classList.replace('light-mode', 'dark-mode'); localStorage.setItem('theme', 'dark'); }
 }
-function login() {
+
+function switchScreen(hideId, showId) {
+    forceCloseAllModals();
+    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.classList.add('hidden'); });
+    const target = document.getElementById(showId);
+    target.classList.remove('hidden'); target.classList.add('active');
+}
+
+function handleLogin() {
     const name = document.getElementById('student-name').value.trim();
     if(name.length < 2) return alert("Ismingizni kiriting!");
+    currentUser = name; document.getElementById('display-name').innerText = name;
     if(audioCtx.state === 'suspended') audioCtx.resume();
-    switchScreen('screen-welcome', 'screen-dash');
+    document.getElementById('global-nav').classList.remove('hidden');
+    switchScreen('welcome-screen', 'dashboard-screen');
 }
+
 function goHome() { 
-    clearInterval(timerInterval); 
-    forceCloseAllModals();
-    switchScreen('screen-test', 'screen-dash'); 
+    clearInterval(timerInterval); forceCloseAllModals();
+    document.getElementById('exit-test-btn').classList.add('hidden');
+    document.getElementById('exam-timer').classList.add('hidden');
+    switchScreen('test-screen', 'dashboard-screen'); 
     updateDashboardStats(); 
 }
 function confirmExit() { if(confirm("Testdan chiqishni xohlaysizmi?")) goHome(); }
-function updateDashboardStats() {
-    let l = document.getElementById('dash-learned'); if(l) l.innerText = stats.learned.length;
-    let e = document.getElementById('dash-errors'); if(e) e.innerText = stats.errors.length;
-}
-function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
+function logout() { if(confirm("Tizimdan chiqishni xohlaysizmi?")) location.reload(); }
 
-// --- 3. Levels & Chapters ---
+function updateDashboardStats() {
+    stats.learned = [...new Set(stats.learned)]; stats.errors = [...new Set(stats.errors)];
+    localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
+    document.getElementById('learned-count').innerText = stats.learned.length;
+    document.getElementById('error-count').innerText = stats.errors.length;
+    document.getElementById('error-work-btn').disabled = stats.errors.length === 0;
+}
+
+// ==========================================
+// 3. LEVEL & CHAPTERS (MODALS)
+// ==========================================
 function openLevels(sub, title) {
-    forceCloseAllModals();
-    pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
+    forceCloseAllModals(); pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
     const grid = document.getElementById('level-grid-box'); grid.innerHTML = '';
     let subQs = bank.filter(q => q.subject === sub);
     for(let i=0; i<10; i++) {
         let start = i * 20; let end = start + 20;
         if(start >= subQs.length) break;
         let btn = document.createElement('button'); btn.className = 'lvl-btn';
-        btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; opacity:0.7">${start+1}-${end}</span>`;
+        let learned = subQs.slice(start, end).filter(q => stats.learned.includes(q.id)).length;
+        let isFull = learned === (end - start);
+        btn.innerHTML = `<b>${i+1}-LVL</b> <span style="font-size:0.8rem; color:${isFull ? 'var(--success)' : 'var(--text-sec)'}">${learned}/${end-start} ✅</span>`;
         btn.onclick = () => { pendingLevelQs = subQs.slice(start, end); testType = 'level'; openSetup(); };
         grid.appendChild(btn);
     }
@@ -133,8 +146,7 @@ function openLevels(sub, title) {
 }
 
 function openChapters() {
-    forceCloseAllModals();
-    const grid = document.getElementById('chapters-grid-box'); grid.innerHTML = '';
+    forceCloseAllModals(); const grid = document.getElementById('chapters-grid-box'); grid.innerHTML = '';
     const cleanBank = [...bank].sort((a,b) => a.id - b.id);
     const chunks = Math.ceil(cleanBank.length / 20);
     for(let i=0; i<chunks; i++) {
@@ -143,7 +155,7 @@ function openChapters() {
         let learned = chunkQs.filter(q => stats.learned.includes(q.id)).length;
         let isFull = learned === (end - start);
         let btn = document.createElement('button'); btn.className = 'lvl-btn';
-        btn.innerHTML = `Bob: ${start+1}-${end} <br><span style="font-size:0.85rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learned}/${end - start} ✅</span>`;
+        btn.innerHTML = `Bob: ${start+1}-${end} <span style="font-size:0.8rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learned}/${end - start} ✅</span>`;
         btn.onclick = () => { pendingLevelQs = chunkQs; testType = 'chapter'; openSetup(); };
         grid.appendChild(btn);
     }
@@ -151,26 +163,28 @@ function openChapters() {
 }
 
 function prepareTest(type) {
-    forceCloseAllModals(); // "Fandan Aralash" bosilganda qat'iy yopish
-    if (type === 'errors' && stats.errors.length === 0) return alert("Sizda xatolar yo'q. Barakalla!");
+    forceCloseAllModals();
+    if (type === 'errors' && stats.errors.length === 0) return alert("Xatolar topilmadi!");
     testType = type; openSetup();
 }
 
-function openSetup() { 
-    forceCloseAllModals(); // Sozlamalar ochilishidan oldin tozalash
-    document.getElementById('modal-setup').style.display = 'flex'; 
+// ==========================================
+// 4. SETUP
+// ==========================================
+function openSetup() { forceCloseAllModals(); document.getElementById('setup-screen').style.display = 'flex'; }
+
+function setDifficulty(level, btn) {
+    document.querySelectorAll('.difficulty-control .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if(level === 'easy') diffTime = 1200; if(level === 'medium') diffTime = 900; if(level === 'hard') diffTime = 600; 
+}
+function setOrder(mode, btn) {
+    document.querySelectorAll('.order-control .seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); orderMode = mode;
 }
 
-function setDifficulty(btn) {
-    document.querySelectorAll('#modal-setup .lvl-btn:nth-child(-n+3)').forEach(b => b.style.opacity = '0.4');
-    btn.style.opacity = '1';
-}
-
-// --- 4. Test Logic ---
-function applySetup(order) {
-    forceCloseAllModals(); // Test boshlanayotganda hammasini o'chirish
-    isExamMode = false;
-    let pool = []; 
+function applySetup() {
+    forceCloseAllModals(); isExamMode = false; let pool = []; 
     let cleanBank = [...bank].sort((a,b) => a.id - b.id);
 
     if(testType === 'level' || testType === 'chapter') pool = [...pendingLevelQs];
@@ -178,89 +192,153 @@ function applySetup(order) {
     else if(testType === 'errors') pool = cleanBank.filter(q => stats.errors.includes(q.id));
     else if(testType === 'sub_mix') pool = cleanBank.filter(q => q.subject === pendingSubject).sort(() => Math.random()-0.5).slice(0, 20);
     
-    if(order === 'rand') pool = pool.sort(() => Math.random() - 0.5);
+    if(orderMode === 'random') pool = pool.sort(() => Math.random() - 0.5);
     else pool = pool.sort((a,b) => a.id - b.id);
 
     currentTest = pool; startTestSession();
 }
 
 function startExamMode() {
-    forceCloseAllModals();
-    testType = 'exam'; isExamMode = true; let examQs = [];
+    forceCloseAllModals(); testType = 'exam'; isExamMode = true; let examQs = [];
     const subjects = ['musiqa_nazariyasi', 'cholgu_ijrochiligi', 'vokal_ijrochiligi', 'metodika_repertuar'];
     subjects.forEach(sub => { let sQs = bank.filter(q => q.subject === sub).sort(() => Math.random() - 0.5).slice(0, 15); examQs = examQs.concat(sQs); });
-    currentTest = examQs.sort(() => Math.random() - 0.5); startTestSession();
+    currentTest = examQs.sort(() => Math.random() - 0.5); diffTime = 3600; startTestSession();
 }
 
-// --- 5. Engine & Animations ---
+// ==========================================
+// 5. TEST ENGINE (BLUR LIST & SCROLL)
+// ==========================================
 function startTestSession() {
-    switchScreen('screen-dash', 'screen-test'); currentIdx = 0;
+    switchScreen('dashboard-screen', 'test-screen'); document.getElementById('exit-test-btn').classList.remove('hidden'); document.getElementById('exam-timer').classList.remove('hidden');
+    currentIdx = 0; currentIndex = 0; userAnswers = new Array(currentTest.length).fill(null);
+    
     currentTest = currentTest.map(q => {
         let shuffledOpts = [...q.originalOpts].sort(() => Math.random() - 0.5);
-        return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(q.correctText), userAns: null };
+        return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(q.correctText) };
     });
-    document.getElementById('dot-track').innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}">${i+1}</div>`).join('');
-    if(isExamMode) { document.getElementById('exam-timer').style.display = 'block'; startTimer(3600); } 
-    else document.getElementById('exam-timer').style.display = 'none';
-    loadQuestion();
+
+    clearInterval(timerInterval); startTimer(diffTime);
+    renderMap(); renderAllQuestions();
 }
 
 function startTimer(seconds) {
-    clearInterval(timerInterval);
+    let time = seconds;
     timerInterval = setInterval(() => {
-        seconds--; let m = Math.floor(seconds/60); let s = seconds % 60;
-        document.getElementById('exam-timer').innerText = `${m}:${s<10?'0':''}${s}`;
-        if(seconds <= 0) { clearInterval(timerInterval); showResult(); }
+        time--; let m = Math.floor(time / 60), s = time % 60;
+        document.getElementById('exam-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        if (time <= 0) { clearInterval(timerInterval); showResult(userAnswers.filter(a => a?.isCorrect).length); }
     }, 1000);
 }
 
-function loadQuestion() {
-    const q = currentTest[currentIdx];
-    document.getElementById('live-counter').innerText = `Savol: ${currentIdx + 1} / ${currentTest.length}`;
-    document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-    const activeDot = document.getElementById(`dot-${currentIdx}`);
-    if(activeDot) { activeDot.classList.add('active'); activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
-
-    const spin = document.getElementById('casino-spin'); const qCard = document.getElementById('question-card');
-    qCard.classList.remove('shake');
-    let sc = 0; let si = setInterval(() => {
-        spin.innerText = Math.floor(Math.random() * currentTest.length) + 1;
-        if(++sc > 8) { clearInterval(si); spin.innerText = currentIdx + 1; }
-    }, 40);
-
-    document.getElementById('question-text').innerText = q.q;
-    document.getElementById('options-box').innerHTML = q.options.map((opt, i) => `<button class="opt-btn" onclick="selectAnswer(${i}, this, event)">${opt}</button>`).join('');
+function renderMap() {
+    document.getElementById('indicator-map').innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}" onclick="goTo(${i})">${i+1}</div>`).join('');
 }
 
-function selectAnswer(selectedIdx, btnEl, event) {
-    document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-    const q = currentTest[currentIdx]; const isCorrect = (selectedIdx === q.answer); q.userAns = isCorrect;
-    const dot = document.getElementById(`dot-${currentIdx}`); const qCard = document.getElementById('question-card');
+function renderAllQuestions() {
+    const area = document.getElementById('all-questions-area');
+    area.innerHTML = currentTest.map((q, idx) => `
+        <div class="q-block ${idx === currentIndex ? 'active-q' : 'blurred-q'}" id="q-block-${idx}">
+            <div class="q-meta">
+                <div class="spin-box" id="spin-${idx}">${idx+1}</div>
+                Savol ${idx+1} / ${currentTest.length}
+            </div>
+            <div class="q-text">${q.q}</div>
+            <div class="options-box" id="opts-${idx}">
+                ${q.options.map((opt, optIdx) => `
+                    <button class="option-btn" id="btn-${idx}-${optIdx}" onclick="checkAns(${idx}, ${optIdx}, event)" ${userAnswers[idx] ? 'disabled' : ''}>
+                        ${opt}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+    updateMap(); scrollToActive(); runSpin(currentIndex);
+}
 
-    if(isCorrect) {
-        btnEl.style.background = 'var(--success)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--success)';
-        btnEl.style.boxShadow = '0 0 20px rgba(50, 215, 75, 0.5)';
-        dot.classList.add('correct'); playFeedback('correct');
-        createParticles(event.clientX, event.clientY);
-        if(!stats.learned.includes(q.id)) stats.learned.push(q.id);
-        stats.errors = stats.errors.filter(id => id !== q.id); 
-    } else {
-        btnEl.style.background = 'var(--error)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--error)';
-        qCard.classList.add('shake'); dot.classList.add('wrong'); playFeedback('wrong');
-        if(!stats.errors.includes(q.id)) stats.errors.push(q.id);
+function runSpin(idx) {
+    const spin = document.getElementById(`spin-${idx}`); if(!spin) return;
+    let sc = 0; let si = setInterval(() => { spin.innerText = Math.floor(Math.random() * currentTest.length) + 1; if(++sc > 8) { clearInterval(si); spin.innerText = idx + 1; } }, 40);
+}
+
+function updateFocus() {
+    for(let i = 0; i < currentTest.length; i++) {
+        const block = document.getElementById(`q-block-${i}`);
+        if(block) { if(i === currentIndex) { block.classList.remove('blurred-q'); block.classList.add('active-q'); runSpin(i); } else { block.classList.remove('active-q'); block.classList.add('blurred-q'); } }
     }
-    localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
-    setTimeout(() => { if(currentIdx < currentTest.length - 1) { currentIdx++; loadQuestion(); } else showResult(); }, 1000); 
+    scrollToActive(); updateMap();
 }
 
-function showResult() {
+function scrollToActive() {
+    const activeBlock = document.getElementById(`q-block-${currentIndex}`);
+    if (activeBlock) activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const activeDot = document.getElementById(`dot-${currentIndex}`);
+    if(activeDot) activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+}
+
+function updateMap() {
+    let answered = userAnswers.filter(a => a !== null).length;
+    document.getElementById('progress-fill').style.width = `${(answered / currentTest.length) * 100}%`;
+    currentTest.forEach((_, i) => {
+        const dot = document.getElementById(`dot-${i}`);
+        if(dot) { dot.className = 'dot'; if (i === currentIndex) dot.classList.add('active-dot'); if (userAnswers[i]) dot.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong'); }
+    });
+}
+
+function checkAns(qIdx, optIdx, event) {
+    if (qIdx !== currentIndex || userAnswers[qIdx]) return;
+    const isCorrect = optIdx === currentTest[qIdx].answer; userAnswers[qIdx] = { selected: optIdx, isCorrect };
+    const qId = currentTest[qIdx].id; const clickedBtn = document.getElementById(`btn-${qIdx}-${optIdx}`);
+    
+    if (isCorrect) {
+        if (!stats.learned.includes(qId)) stats.learned.push(qId);
+        stats.errors = stats.errors.filter(id => id !== qId); 
+        clickedBtn.classList.add('magic-correct'); playFeedback('correct'); createParticles(event);
+    } else {
+        if (!stats.errors.includes(qId)) stats.errors.push(qId);
+        clickedBtn.classList.add('magic-wrong'); playFeedback('wrong');
+        // DIQQAT: Yashirin javob qoidasi - To'g'ri javob KO'RSATILMAYDI.
+    }
+    
+    localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
+    const options = document.getElementById(`opts-${qIdx}`).getElementsByTagName('button');
+    for(let btn of options) btn.disabled = true;
+
+    if (userAnswers.filter(a => a !== null).length === currentTest.length) document.getElementById('finish-btn').classList.remove('hidden');
+
+    setTimeout(() => { 
+        let next = userAnswers.findIndex(ans => ans === null); 
+        if (next !== -1) { currentIndex = next; updateFocus(); } 
+    }, 800);
+}
+
+function move(step) { let n = currentIndex + step; if (n >= 0 && n < currentTest.length) { currentIndex = n; updateFocus(); } }
+function goTo(i) { currentIndex = i; updateFocus(); }
+
+// ==========================================
+// 6. RESULT
+// ==========================================
+function finishExam() {
     clearInterval(timerInterval);
-    let correctCount = currentTest.filter(q => q.userAns === true).length;
+    let correctCount = userAnswers.filter(a => a?.isCorrect).length;
+    if(!isExamMode && correctCount < currentTest.length) {
+        // EXAM mode bo'lmasa 100% yechish talab qilinadi
+        alert(`Natija: ${correctCount}/${currentTest.length}. Qoidaga ko'ra, 100% to'g'ri bo'lmaguncha ushbu savollar aralashtirib qayta beriladi.`);
+        currentTest = shuffleArray(currentTest).map(q => {
+            let correctText = q.options[q.answer]; let shuffledOpts = shuffleArray([...q.options]);
+            return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(correctText) };
+        });
+        userAnswers = new Array(currentTest.length).fill(null); currentIndex = 0; startTimer(diffTime); renderAllQuestions(); document.getElementById('finish-btn').classList.add('hidden');
+    } else {
+        showResult(correctCount);
+    }
+}
+function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+function showResult(correctCount) {
     let percent = Math.round((correctCount / currentTest.length) * 100);
     document.getElementById('result-percent').innerText = `${percent}%`;
-    
     let msg = "", color = "";
-    if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; }
+    if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });}
     else if(percent >= 70) { msg = "Yaxshi natija, lekin biroz mashq qiling. 👍"; color = "var(--primary)"; }
     else if(percent >= 50) { msg = "Ko'rdingizmi? Yana urinib ko'ring! 📚"; color = "var(--warning)"; }
     else { msg = "Ko'proq mashq kerak! Xatolar ustida ishlang. ⚠️"; color = "var(--error)"; }
@@ -269,8 +347,5 @@ function showResult() {
     document.getElementById('result-donut').style.borderColor = color;
     document.getElementById('result-donut').style.boxShadow = `0 0 30px ${color}`;
     document.getElementById('result-percent').style.color = color;
-    document.getElementById('result-percent').style.textShadow = `0 0 15px ${color}`;
-    
-    forceCloseAllModals(); // Natija chiqishidan oldin ham tozalaymiz
-    document.getElementById('modal-result').style.display = 'flex';
+    forceCloseAllModals(); document.getElementById('modal-result').style.display = 'flex';
 }
