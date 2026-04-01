@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRO EXAM v7.0</title>
+    <title>PRO EXAM v7.0 Magic Edition</title>
     <style>
         /* =========================================
-           UI/UX: iOS 26 Vision & Eye Comfort
+           UI/UX: iOS 26 Vision, Eye Comfort & Magic
            ========================================= */
         :root {
             --primary: #0A84FF;
             --success: #32D74B;
             --warning: #FFD60A;
             --error: #FF453A;
-            --bg-color: #05050A; /* Deep Navy / Black */
-            --card-bg: rgba(28, 28, 32, 0.65);
+            --bg-dark: #05050A; 
+            --card-bg: rgba(20, 20, 25, 0.65);
             --text-main: #F2F2F7;
             --text-muted: #8E8E93;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --neon-glow: 0 0 15px rgba(10, 132, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --magic-glow: 0 0 25px rgba(10, 132, 255, 0.6);
         }
 
         * {
@@ -27,25 +27,31 @@
             padding: 0;
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            outline: none;
         }
 
         body {
-            background-color: var(--bg-color);
+            /* Background Overlay + Image */
+            background-color: var(--bg-dark);
+            background-image: linear-gradient(to bottom, rgba(5, 5, 10, 0.88), rgba(5, 5, 10, 0.95)), url('bino.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-main);
             overflow-x: hidden;
             user-select: none; /* Anti-copy */
         }
 
-        /* Glassmorphism Utilities */
+        /* Glassmorphism & Magic Utilities */
         .glass {
             background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
-        /* Screen Management */
+        /* Screen Transitions */
         .screen {
             display: none;
             min-height: 100vh;
@@ -55,12 +61,12 @@
         }
         .screen.active {
             display: flex;
-            animation: fadeIn 0.5s ease forwards;
+            animation: magicFadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes magicFadeIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
         /* =========================================
@@ -70,279 +76,166 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background: radial-gradient(circle at top right, rgba(10, 132, 255, 0.15), transparent 40%), var(--bg-color);
         }
 
         .hero-card {
             width: 100%;
             max-width: 450px;
             padding: 40px 25px;
-            border-radius: 32px;
+            border-radius: 35px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
+        /* Sehrli Logo */
         .main-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 20px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%; /* Dumaloq */
+            object-fit: cover;
             margin-bottom: 20px;
-            box-shadow: var(--neon-glow);
+            border: 2px solid rgba(10, 132, 255, 0.8);
             cursor: pointer;
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(10, 132, 255, 0.3), inset 0 0 10px rgba(10, 132, 255, 0.3); }
+            to { box-shadow: 0 0 30px rgba(10, 132, 255, 0.8), inset 0 0 20px rgba(191, 90, 242, 0.5); border-color: #BF5AF2; }
         }
 
         .hero-title {
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: 2.2rem;
+            font-weight: 900;
             margin-bottom: 12px;
-            background: linear-gradient(135deg, #fff, #a1a1a6);
+            background: linear-gradient(135deg, #fff, #BF5AF2, #0A84FF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
         }
 
-        .hero-subtitle {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin-bottom: 30px;
-        }
+        .hero-subtitle { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 30px; }
 
         .premium-input {
-            width: 100%;
-            padding: 18px;
-            border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-main);
-            font-size: 1.05rem;
-            text-align: center;
-            margin-bottom: 20px;
-            outline: none;
-            transition: 0.3s;
+            width: 100%; padding: 18px; border-radius: 20px; border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05); color: var(--text-main); font-size: 1.05rem;
+            text-align: center; margin-bottom: 20px; transition: 0.3s;
         }
-        .premium-input:focus { border-color: var(--primary); box-shadow: var(--neon-glow); }
+        .premium-input:focus { border-color: var(--primary); box-shadow: var(--magic-glow); background: rgba(0,0,0,0.5); }
 
         .btn-start {
-            width: 100%;
-            padding: 18px;
-            border-radius: 18px;
-            background: var(--primary);
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
-            transition: transform 0.2s;
+            width: 100%; padding: 18px; border-radius: 20px; background: var(--primary);
+            color: #fff; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(10, 132, 255, 0.4); transition: all 0.2s;
         }
-        .btn-start:active { transform: scale(0.96); }
+        .btn-start:active { transform: scale(0.95); box-shadow: 0 2px 10px rgba(10, 132, 255, 0.4); }
 
         /* =========================================
            2. DASHBOARD (ASOSIY MENYU)
            ========================================= */
         .header-sticky {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 100; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .logo-text { 
-            font-weight: 900; 
-            font-size: 1.2rem; 
-            letter-spacing: 0.5px; 
-            cursor: pointer; 
-            color: var(--primary);
-        }
+        .logo-text { font-weight: 900; font-size: 1.2rem; cursor: pointer; color: var(--primary); text-shadow: 0 0 10px rgba(10,132,255,0.5); }
         
         .progress-badges { display: flex; gap: 8px; }
-        .badge {
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 800;
-        }
-        .badge.green { background: rgba(50, 215, 75, 0.15); color: var(--success); }
-        .badge.red { background: rgba(255, 69, 58, 0.15); color: var(--error); }
+        .badge { padding: 6px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; display:flex; align-items:center; gap:5px;}
+        .badge.green { background: rgba(50, 215, 75, 0.15); color: var(--success); border: 1px solid rgba(50,215,75,0.2);}
+        .badge.red { background: rgba(255, 69, 58, 0.15); color: var(--error); border: 1px solid rgba(255,69,58,0.2);}
 
         .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 25px 20px;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+            padding: 25px 20px; max-width: 800px; margin: 0 auto; width: 100%;
         }
 
         @media (max-width: 450px) { .menu-grid { grid-template-columns: 1fr; } }
 
         .menu-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            padding: 20px 15px;
-            border-radius: 22px;
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 1rem;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.2s;
+            background: var(--card-bg); border: 1px solid var(--glass-border); padding: 22px 15px;
+            border-radius: 24px; color: var(--text-main); font-weight: 600; font-size: 0.95rem;
+            text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative; overflow: hidden;
         }
-        .menu-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
+        .menu-btn::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.4s, height 0.4s;
+        }
+        .menu-btn:active::after { width: 300px; height: 300px; }
+        .menu-btn:active { transform: scale(0.96); border-color: var(--primary); }
         
         .btn-exam {
             grid-column: 1 / -1; 
-            background: linear-gradient(135deg, #BF5AF2, #5E5CE6);
-            color: #fff;
-            justify-content: center;
-            font-size: 1.1rem;
-            font-weight: 800;
-            border: none;
-            padding: 22px;
+            background: linear-gradient(135deg, #BF5AF2, #5E5CE6, #0A84FF);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            color: #fff; justify-content: center; font-size: 1.1rem; font-weight: 800; border: none; padding: 22px;
+            box-shadow: 0 10px 30px rgba(94, 92, 230, 0.4);
         }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         /* =========================================
            3. TEST ENGINE UI
            ========================================= */
         .live-stats { font-weight: 800; font-size: 1rem; }
         .btn-exit {
-            background: rgba(255, 69, 58, 0.15);
-            color: var(--error);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
+            background: rgba(255, 69, 58, 0.15); color: var(--error); border: none;
+            padding: 8px 15px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
         }
+        .btn-exit:active { transform: scale(0.9); }
 
-        /* Auto Indicator Bar */
-        .indicator-scroll {
-            width: 100%;
-            overflow-x: auto;
-            padding: 20px 0;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
+        .indicator-scroll { width: 100%; overflow-x: auto; padding: 20px 0; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .indicator-scroll::-webkit-scrollbar { display: none; }
-        
-        .indicator-track {
-            display: flex;
-            gap: 10px;
-            padding: 0 50vw; /* Markazga kelishi uchun */
-        }
+        .indicator-track { display: flex; gap: 10px; padding: 0 50vw; }
 
         .dot {
-            min-width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            min-width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.95rem; color: var(--text-muted); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .dot.active {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            transform: scale(1.15);
-            box-shadow: var(--neon-glow);
-            background: var(--bg-color);
-        }
-        .dot.correct { background: var(--success); color: #fff; border: none; }
-        .dot.wrong { background: var(--error); color: #fff; border: none; }
+        .dot.active { border: 2px solid var(--primary); color: var(--primary); transform: scale(1.2); box-shadow: var(--magic-glow); background: var(--bg-dark); }
+        .dot.correct { background: var(--success); color: #fff; border: none; box-shadow: 0 0 10px rgba(50,215,75,0.4); }
+        .dot.wrong { background: var(--error); color: #fff; border: none; box-shadow: 0 0 10px rgba(255,69,58,0.4); }
 
-        /* Question Area */
-        .q-container {
-            flex-grow: 1;
-            padding: 10px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-        }
+        .q-container { flex-grow: 1; padding: 10px 20px; display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: 0 auto; width: 100%; }
+        .q-card { width: 100%; padding: 35px 20px; border-radius: 30px; text-align: center; margin-bottom: 25px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; border-top: 1px solid rgba(255,255,255,0.2); }
 
-        .q-card {
-            width: 100%;
-            padding: 30px 20px;
-            border-radius: 28px;
-            text-align: center;
-            margin-bottom: 25px;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Casino Spin Animation */
-        .spin-box {
-            font-size: 1.1rem;
-            color: var(--primary);
-            font-weight: 800;
-            margin-bottom: 15px;
-            height: 24px;
-        }
-        .q-text { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+        .spin-box { font-size: 1.2rem; color: var(--primary); font-weight: 900; margin-bottom: 15px; height: 26px; text-shadow: 0 0 10px rgba(10,132,255,0.5); }
+        .q-text { font-size: 1.25rem; font-weight: 600; line-height: 1.5; }
 
         .options-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; }
         .opt-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 20px;
-            color: var(--text-main);
-            font-size: 1.05rem;
-            font-weight: 500;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 20px;
+            border-radius: 20px; color: var(--text-main); font-size: 1.05rem; font-weight: 500;
+            text-align: left; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+        .opt-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
 
-        /* Animations */
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-            40%, 60% { transform: translate3d(8px, 0, 0); }
-        }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
 
         /* Modals */
         .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
         }
-        .modal-content {
-            width: 100%; max-width: 380px;
-            padding: 25px; border-radius: 32px;
-        }
+        .modal-content { width: 100%; max-width: 400px; padding: 25px; border-radius: 35px; border-top: 1px solid rgba(255,255,255,0.2); max-height: 80vh; overflow-y: auto;}
+        .modal-content::-webkit-scrollbar { display: none; }
         
         .level-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .lvl-btn { padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #fff; font-weight: 700; cursor: pointer; }
-        
-        /* Result Donut */
+        .lvl-btn { 
+            padding: 15px; border-radius: 18px; background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--glass-border); color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .lvl-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+
         .donut {
-            width: 140px; height: 140px; border-radius: 50%;
-            border: 10px solid var(--glass-border);
-            margin: 20px auto; display: flex; align-items: center; justify-content: center;
+            width: 140px; height: 140px; border-radius: 50%; border: 12px solid var(--glass-border);
+            margin: 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
         .donut span { font-size: 2.2rem; font-weight: 900; }
         .res-msg { text-align: center; font-size: 1.1rem; font-weight: 700; margin-bottom: 25px; line-height: 1.4;}
@@ -354,7 +247,7 @@
     <!-- 1. WELCOME SCREEN -->
     <div id="screen-welcome" class="screen active">
         <div class="hero-card glass">
-            <!-- LOGO: Bosh sahifaga qaytish vazifasini ham bajaradi -->
+            <!-- Dumaloq, pulsatsiyali Logo -->
             <img src="logo.png" class="main-logo" alt="Logo" onclick="location.reload()" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
             <h1 class="hero-title">PRO EXAM</h1>
             <p class="hero-subtitle">Bu yerda siz imtihonga tayyor bo'lasiz. Real test muhitida mashq qiling va natijangizni oshiring.</p>
@@ -366,11 +259,10 @@
     <!-- 2. DASHBOARD -->
     <div id="screen-dash" class="screen">
         <div class="header-sticky glass">
-            <!-- Matnli LOGO: Bosilganda reload bo'ladi -->
             <div class="logo-text" onclick="location.reload()">PRO EXAM</div>
             <div class="progress-badges">
-                <div class="badge green">O'zlashtirildi: <span id="dash-learned">0</span>/800</div>
-                <div class="badge red">Xatolar: <span id="dash-errors">0</span></div>
+                <div class="badge green">✅ <span id="dash-learned">0</span></div>
+                <div class="badge red">❌ <span id="dash-errors">0</span></div>
             </div>
         </div>
 
@@ -381,9 +273,9 @@
             <button class="menu-btn" onclick="openLevels('metodika_repertuar', 'Metodika')">📚 Metodika <span>›</span></button>
             
             <button class="menu-btn" style="justify-content:center; color:var(--primary);" onclick="prepareTest('mix_800')">🎲 1-800 Aralash</button>
-            <button class="menu-btn" style="justify-content:center;" onclick="prepareTest('seq_800')">⬇️ 1-800 Ketma-ket</button>
+            <button class="menu-btn" style="justify-content:center;" onclick="openChapters()">📑 Bo'limlar (Boblar)</button>
             <button class="menu-btn" style="justify-content:center; color:var(--error);" onclick="prepareTest('errors')">🛠 Xatolar ustida ishlash</button>
-            <button class="menu-btn btn-exam" onclick="startExamMode()">🎓 IMTIHON MODE (60 savol)</button>
+            <button class="menu-btn btn-exam" onclick="startExamMode()">🎓 IMTIHON MODE (60)</button>
         </div>
     </div>
 
@@ -392,7 +284,7 @@
         <div class="header-sticky glass">
             <button class="btn-exit" onclick="confirmExit()">🚪 Chiqish</button>
             <div id="live-counter" class="live-stats">Savol: 1 / 20</div>
-            <div id="exam-timer" class="live-stats" style="color:var(--warning); display:none;">00:00</div>
+            <div id="exam-timer" class="live-stats" style="color:var(--warning); display:none; text-shadow:0 0 10px rgba(255,214,10,0.5);">00:00</div>
         </div>
 
         <div class="indicator-scroll" id="auto-scroll-box">
@@ -404,40 +296,51 @@
                 <div id="casino-spin" class="spin-box">1</div>
                 <div id="question-text" class="q-text">Yuklanmoqda...</div>
             </div>
-            
             <div class="options-grid" id="options-box"></div>
         </div>
     </div>
 
     <!-- MODALS -->
+    <!-- Fandagi 10 ta daraja modal -->
     <div id="modal-level" class="modal-overlay" onclick="closeModal(event, 'modal-level')">
         <div class="modal-content glass">
             <h2 id="modal-subject-title" style="margin-bottom: 15px; font-weight:800; text-align:center;">Fan</h2>
             <div class="level-grid" id="level-grid-box"></div>
-            <button class="btn-start" style="margin-top:15px; background:rgba(255,255,255,0.1); color:var(--primary);" onclick="prepareTest('sub_mix')">🎲 Fandan Aralash (20 ta)</button>
+            <button class="btn-start" style="margin-top:15px; background:rgba(255,255,255,0.05); color:var(--primary); border:1px solid var(--primary);" onclick="prepareTest('sub_mix')">🎲 Fandan Aralash (20 ta)</button>
         </div>
     </div>
 
+    <!-- JAMI SAVOLLAR UCHUN DINAMIK BOBLAR MODAL (1-800 ketma-ket o'rniga) -->
+    <div id="modal-chapters" class="modal-overlay" onclick="closeModal(event, 'modal-chapters')">
+        <div class="modal-content glass">
+            <h2 style="margin-bottom: 15px; font-weight:800; text-align:center;">Barcha Boblar</h2>
+            <p style="text-align:center; color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Jami savollar bazasi bo'yicha</p>
+            <div class="level-grid" id="chapters-grid-box"></div>
+        </div>
+    </div>
+
+    <!-- Qiyinlik va Tartib sozlamasi -->
     <div id="modal-setup" class="modal-overlay" onclick="closeModal(event, 'modal-setup')">
         <div class="modal-content glass">
-            <h3 style="text-align:center; margin-bottom:20px;">Sozlamalar</h3>
+            <h3 style="text-align:center; margin-bottom:20px; font-weight:900;">Sozlamalar</h3>
             <p style="color:var(--text-muted); margin-bottom:10px; font-weight:600; font-size:0.9rem;">Qiyinlik darajasi:</p>
             <div style="display:flex; gap:10px; margin-bottom:25px;">
                 <button class="lvl-btn" style="flex:1; border-color:var(--success); color:var(--success);" onclick="setDifficulty('easy', this)">Oson</button>
                 <button class="lvl-btn" style="flex:1; border-color:var(--warning); color:var(--warning);" onclick="setDifficulty('medium', this)">O'rta</button>
                 <button class="lvl-btn" style="flex:1; border-color:var(--error); color:var(--error);" onclick="setDifficulty('hard', this)">Qiyin</button>
             </div>
-            <p style="color:var(--text-muted); margin-bottom:10px; font-weight:600; font-size:0.9rem;">Savollar tartibi:</p>
+            <p style="color:var(--text-muted); margin-bottom:10px; font-weight:600; font-size:0.9rem;">Ushbu qism uchun tartib:</p>
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <button class="lvl-btn" onclick="applySetup('rand')">🎲 Aralash (Random)</button>
-                <button class="lvl-btn" onclick="applySetup('seq')">⬇️ Ketma-ket</button>
+                <button class="lvl-btn" onclick="applySetup('seq')">⬇️ Ketma-ketlikda</button>
             </div>
         </div>
     </div>
 
+    <!-- Result Modal -->
     <div id="modal-result" class="modal-overlay">
         <div class="modal-content glass">
-            <h2 style="text-align:center;">Natija</h2>
+            <h2 style="text-align:center; font-weight:900;">Natija</h2>
             <div class="donut" id="result-donut">
                 <span id="result-percent">0%</span>
             </div>
@@ -449,7 +352,7 @@
     <!-- JAVASCRIPT -->
     <script>
         // ==========================================
-        // AUDIO & VIBRATION API
+        // AUDIO & VIBRATION API (MAGIC TRICK)
         // ==========================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
@@ -482,7 +385,7 @@
         // ==========================================
         // GLOBAL O'ZGARUVCHILAR
         // ==========================================
-        let bank = [];
+        let bank = []; // Dinamik baza (800 ta bo'lmasligi ham mumkin)
         let currentTest = [];
         let currentIdx = 0;
         let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
@@ -493,7 +396,7 @@
         let testType = null;
 
         // ==========================================
-        // 1. DATA YUKLASH VA FILTERLASH
+        // 1. DATA YUKLASH
         // ==========================================
         async function loadData() {
             const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
@@ -509,7 +412,6 @@
                         let opts = q.options.filter(o => o !== null && o.toString().trim() !== '');
                         let correctText = q.options[q.answer]; 
 
-                        // 3 TA VARIANT BO'LSA: Avtomatik 4-sini qo'shish
                         if(opts.length === 3) opts.push("Barcha javoblar to'g'ri");
 
                         bank.push({
@@ -520,14 +422,16 @@
                             correctText: correctText
                         });
                     });
-                } catch(e) { console.warn(f + " yuklanmadi."); }
+                } catch(e) { console.warn(f + " topilmadi."); }
             }
+            // Avtomatik o'zlashtirishni jami savollarga nisbatan ko'rsatamiz
+            document.getElementById('dash-learned').parentNode.innerHTML = `✅ <span id="dash-learned">${stats.learned.length}</span> / ${bank.length}`;
             updateDashboardStats();
         }
         window.onload = loadData;
 
         // ==========================================
-        // 2. EKRANLAR VA MENYU BOSHQRUVI
+        // 2. BOSHQRUV VA MENYU
         // ==========================================
         function switchScreen(hideId, showId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -537,7 +441,6 @@
         function login() {
             const name = document.getElementById('student-name').value.trim();
             if(name.length < 2) return alert("Ismingizni kiriting!");
-            // Audio contextni user bilan interaksiyada uyg'otish
             if(audioCtx.state === 'suspended') audioCtx.resume();
             switchScreen('screen-welcome', 'screen-dash');
         }
@@ -550,7 +453,7 @@
         }
 
         function confirmExit() {
-            if(confirm("Testdan chiqishni xohlaysizmi? Yechilmagan natijalar saqlanmaydi.")) goHome();
+            if(confirm("Testdan chiqishni xohlaysizmi? Natijalar saqlanmaydi.")) goHome();
         }
 
         function updateDashboardStats() {
@@ -563,7 +466,7 @@
         }
 
         // ==========================================
-        // 3. LEVEL VA SOZLAMALAR
+        // 3. LEVEL & CHAPTERS (BOBLAR)
         // ==========================================
         function openLevels(sub, title) {
             pendingSubject = sub;
@@ -580,7 +483,7 @@
                 
                 let btn = document.createElement('button');
                 btn.className = 'lvl-btn';
-                btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; opacity:0.7">${start+1}-${end}</span>`;
+                btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; color:var(--text-muted)">${start+1}-${end}</span>`;
                 btn.onclick = () => {
                     pendingLevelQs = subQs.slice(start, end);
                     testType = 'level';
@@ -591,9 +494,40 @@
             document.getElementById('modal-level').style.display = 'flex';
         }
 
+        // DINAMIK BOBLAR FUNKSIYASI
+        function openChapters() {
+            const grid = document.getElementById('chapters-grid-box');
+            grid.innerHTML = '';
+            
+            const totalQs = bank.length;
+            const chunks = Math.ceil(totalQs / 20);
+            
+            for(let i=0; i<chunks; i++) {
+                let start = i * 20;
+                let end = Math.min(start + 20, totalQs);
+                
+                let chunkQs = bank.slice(start, end);
+                let learnedInChunk = chunkQs.filter(q => stats.learned.includes(q.id)).length;
+                let isFull = learnedInChunk === (end - start);
+                
+                let btn = document.createElement('button');
+                btn.className = 'lvl-btn';
+                btn.innerHTML = `Bob: ${start+1}-${end} <br><span style="font-size:0.85rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learnedInChunk} / ${end - start} ✅</span>`;
+                
+                btn.onclick = () => {
+                    pendingLevelQs = chunkQs;
+                    testType = 'chapter';
+                    document.getElementById('modal-chapters').style.display = 'none';
+                    openSetup();
+                };
+                grid.appendChild(btn);
+            }
+            document.getElementById('modal-chapters').style.display = 'flex';
+        }
+
         function prepareTest(type) {
             document.getElementById('modal-level').style.display = 'none';
-            if (type === 'errors' && stats.errors.length === 0) return alert("Sizda xatolar yo'q. Barakalla!");
+            if (type === 'errors' && stats.errors.length === 0) return alert("Sizda hozircha xatolar yo'q. Barakalla!");
             testType = type;
             openSetup();
         }
@@ -604,24 +538,24 @@
 
         function setDifficulty(lvl, btn) {
             let btns = document.querySelectorAll('#modal-setup .lvl-btn:nth-child(-n+3)');
-            btns.forEach(b => b.style.opacity = '0.5');
+            btns.forEach(b => b.style.opacity = '0.4');
             btn.style.opacity = '1';
         }
 
         // ==========================================
-        // 4. TEST BAZASINI SHAKLLANTIRISH
+        // 4. TEST START LOGIC
         // ==========================================
         function applySetup(order) {
             document.getElementById('modal-setup').style.display = 'none';
             isExamMode = false;
             
             let pool = [];
-            if(testType === 'level') pool = [...pendingLevelQs];
+            if(testType === 'level' || testType === 'chapter') pool = [...pendingLevelQs];
             else if(testType === 'mix_800') pool = bank.sort(() => Math.random() - 0.5).slice(0, 20);
-            else if(testType === 'seq_800') pool = bank.slice(0, 20);
             else if(testType === 'errors') pool = bank.filter(q => stats.errors.includes(q.id));
             else if(testType === 'sub_mix') pool = bank.filter(q => q.subject === pendingSubject).sort(() => Math.random()-0.5).slice(0, 20);
             
+            // Tartib: Faqat savollar o'rnini almashtirish
             if(order === 'rand') pool = pool.sort(() => Math.random() - 0.5);
 
             currentTest = pool;
@@ -644,12 +578,13 @@
         }
 
         // ==========================================
-        // 5. TEST ENGINE & ANIMATIONS
+        // 5. TEST ENGINE & ANIMATIONS (MAGIC)
         // ==========================================
         function startTestSession() {
             switchScreen('screen-dash', 'screen-test');
             currentIdx = 0;
             
+            // Javob variantlari har doim random bo'lishi shart
             currentTest = currentTest.map(q => {
                 let shuffledOpts = [...q.originalOpts].sort(() => Math.random() - 0.5);
                 let correctIdx = shuffledOpts.indexOf(q.correctText);
@@ -674,8 +609,7 @@
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 seconds--;
-                let m = Math.floor(seconds/60);
-                let s = seconds % 60;
+                let m = Math.floor(seconds/60); let s = seconds % 60;
                 document.getElementById('exam-timer').innerText = `${m}:${s<10?'0':''}${s}`;
                 if(seconds <= 0) { clearInterval(timerInterval); showResult(); }
             }, 1000);
@@ -725,25 +659,22 @@
             const qCard = document.getElementById('question-card');
 
             if(isCorrect) {
-                btnEl.style.background = 'var(--success)';
-                btnEl.style.color = '#fff';
-                btnEl.style.borderColor = 'var(--success)';
-                btnEl.style.boxShadow = '0 0 15px rgba(50, 215, 75, 0.4)';
+                btnEl.style.background = 'var(--success)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--success)';
+                btnEl.style.boxShadow = '0 0 20px rgba(50, 215, 75, 0.5)';
                 dot.classList.add('correct');
                 playFeedback('correct');
                 
                 if(!stats.learned.includes(q.id)) stats.learned.push(q.id);
                 stats.errors = stats.errors.filter(id => id !== q.id); 
             } else {
-                btnEl.style.background = 'var(--error)';
-                btnEl.style.color = '#fff';
-                btnEl.style.borderColor = 'var(--error)';
+                btnEl.style.background = 'var(--error)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--error)';
+                btnEl.style.boxShadow = '0 0 20px rgba(255, 69, 58, 0.5)';
                 qCard.classList.add('shake');
                 dot.classList.add('wrong');
                 playFeedback('wrong');
                 
                 if(!stats.errors.includes(q.id)) stats.errors.push(q.id);
-                // DIQQAT: Xato belgilanganda to'g'ri javob ko'rsatilmasligi uchun qatorlar olib tashlandi.
+                // To'g'ri javob KO'RSATILMAYDI. Shunchaki o'tib ketadi.
             }
             
             localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
@@ -755,7 +686,7 @@
                 } else {
                     showResult();
                 }
-            }, 1000);
+            }, 1000); 
         }
 
         // ==========================================
@@ -768,29 +699,18 @@
             
             document.getElementById('result-percent').innerText = `${percent}%`;
             
-            let msg = "";
-            let color = "";
+            let msg = ""; let color = "";
             
-            if(percent >= 90) { 
-                msg = "Zo'r! Siz imtihonga to'liq tayyorsiz. 🏆"; 
-                color = "var(--success)"; 
-            }
-            else if(percent >= 70) { 
-                msg = "Yaxshi natija, lekin biroz mashq qiling. 👍"; 
-                color = "var(--primary)"; 
-            }
-            else if(percent >= 50) { 
-                msg = "Ko'rdingizmi? Yana urinib ko'ring! 📚"; 
-                color = "var(--warning)"; 
-            }
-            else { 
-                msg = "Ko'proq mashq kerak! Xatolar ustida ishlang. ⚠️"; 
-                color = "var(--error)"; 
-            }
+            if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; }
+            else if(percent >= 70) { msg = "Yaxshi natija, lekin biroz mashq qiling. 👍"; color = "var(--primary)"; }
+            else if(percent >= 50) { msg = "Ko'rdingizmi? Yana urinib ko'ring! 📚"; color = "var(--warning)"; }
+            else { msg = "Ko'proq mashq kerak! Xatolar ustida ishlang. ⚠️"; color = "var(--error)"; }
 
             document.getElementById('result-msg').innerText = msg;
             document.getElementById('result-donut').style.borderColor = color;
+            document.getElementById('result-donut').style.boxShadow = `0 0 30px ${color}`;
             document.getElementById('result-percent').style.color = color;
+            document.getElementById('result-percent').style.textShadow = `0 0 15px ${color}`;
 
             document.getElementById('modal-result').style.display = 'flex';
         }
