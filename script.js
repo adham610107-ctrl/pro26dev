@@ -1,5 +1,5 @@
 // ==========================================
-// AUDIO & VIBRATION API (BONUS)
+// AUDIO & VIBRATION API (MAGIC TRICK)
 // ==========================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -34,10 +34,10 @@ function playFeedback(type) {
 // ==========================================
 // GLOBAL O'ZGARUVCHILAR
 // ==========================================
-let bank = [];
+let bank = []; // Barcha savollar saqlanadigan dinamik baza
 let currentTest = [];
 let currentIdx = 0;
-// 800 talik statistika xotirada saqlanadi
+// Xotira (localStorage)
 let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
 let timerInterval;
 let pendingSubject = null;
@@ -46,7 +46,7 @@ let isExamMode = false;
 let testType = null;
 
 // ==========================================
-// 1. DATA YUKLASH VA FILTERLASH
+// 1. DATA YUKLASH
 // ==========================================
 async function loadData() {
     const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
@@ -62,7 +62,7 @@ async function loadData() {
                 let opts = q.options.filter(o => o !== null && o.toString().trim() !== '');
                 let correctText = q.options[q.answer]; 
 
-                // 3 TA VARIANT BO'LSA: Avtomatik 4-sini qo'shish
+                // 3 ta variant bo'lsa, 4-sini avtomat qo'shish
                 if(opts.length === 3) opts.push("Barcha javoblar to'g'ri");
 
                 bank.push({
@@ -74,15 +74,17 @@ async function loadData() {
                 });
             });
         } catch(e) { 
-            console.warn(f + " yuklanmadi. JSON fayllar papkada borligini tekshiring."); 
+            console.warn(f + " fayli topilmadi yoki xato bor."); 
         }
     }
+    // Avtomatik o'zlashtirishni jami yig'ilgan savollarga nisbatan ko'rsatish
+    document.getElementById('dash-learned').parentNode.innerHTML = `✅ <span id="dash-learned">${stats.learned.length}</span> / ${bank.length}`;
     updateDashboardStats();
 }
 window.onload = loadData;
 
 // ==========================================
-// 2. EKRANLAR VA MENYU BOSHQRUVI
+// 2. BOSHQRUV VA MENYU
 // ==========================================
 function switchScreen(hideId, showId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -93,7 +95,7 @@ function login() {
     const name = document.getElementById('student-name').value.trim();
     if(name.length < 2) return alert("Ismingizni kiriting!");
     
-    // Ovoz tizimini foydalanuvchi bosganda faollashtirish (brauzer qoidasi)
+    // Ovoz tizimini foydalanuvchi bosganda faollashtirish
     if(audioCtx.state === 'suspended') audioCtx.resume();
     switchScreen('screen-welcome', 'screen-dash');
 }
@@ -106,14 +108,15 @@ function goHome() {
 }
 
 function confirmExit() {
-    if(confirm("Testdan chiqishni xohlaysizmi? Yechilmagan natijalar saqlanmaydi.")) {
-        goHome();
-    }
+    if(confirm("Testdan chiqishni xohlaysizmi? Yechilmagan natijalar saqlanmaydi.")) goHome();
 }
 
 function updateDashboardStats() {
-    document.getElementById('dash-learned').innerText = stats.learned.length;
-    document.getElementById('dash-errors').innerText = stats.errors.length;
+    let learnedEl = document.getElementById('dash-learned');
+    if(learnedEl) learnedEl.innerText = stats.learned.length;
+    
+    let errEl = document.getElementById('dash-errors');
+    if(errEl) errEl.innerText = stats.errors.length;
 }
 
 function closeModal(e, id) {
@@ -121,7 +124,7 @@ function closeModal(e, id) {
 }
 
 // ==========================================
-// 3. LEVEL VA SOZLAMALAR
+// 3. LEVEL & CHAPTERS (BOBLAR) MANTIG'I
 // ==========================================
 function openLevels(sub, title) {
     pendingSubject = sub;
@@ -138,7 +141,7 @@ function openLevels(sub, title) {
         
         let btn = document.createElement('button');
         btn.className = 'lvl-btn';
-        btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; opacity:0.7">${start+1}-${end}</span>`;
+        btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; color:var(--text-muted)">${start+1}-${end}</span>`;
         btn.onclick = () => {
             pendingLevelQs = subQs.slice(start, end);
             testType = 'level';
@@ -147,6 +150,37 @@ function openLevels(sub, title) {
         grid.appendChild(btn);
     }
     document.getElementById('modal-level').style.display = 'flex';
+}
+
+// DINAMIK BOBLAR FUNKSIYASI (Jami bazani 20 tadan qilib bo'ladi)
+function openChapters() {
+    const grid = document.getElementById('chapters-grid-box');
+    grid.innerHTML = '';
+    
+    const totalQs = bank.length;
+    const chunks = Math.ceil(totalQs / 20);
+    
+    for(let i=0; i<chunks; i++) {
+        let start = i * 20;
+        let end = Math.min(start + 20, totalQs);
+        
+        let chunkQs = bank.slice(start, end);
+        let learnedInChunk = chunkQs.filter(q => stats.learned.includes(q.id)).length;
+        let isFull = learnedInChunk === (end - start);
+        
+        let btn = document.createElement('button');
+        btn.className = 'lvl-btn';
+        btn.innerHTML = `Bob: ${start+1}-${end} <br><span style="font-size:0.85rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learnedInChunk} / ${end - start} ✅</span>`;
+        
+        btn.onclick = () => {
+            pendingLevelQs = chunkQs;
+            testType = 'chapter';
+            document.getElementById('modal-chapters').style.display = 'none';
+            openSetup();
+        };
+        grid.appendChild(btn);
+    }
+    document.getElementById('modal-chapters').style.display = 'flex';
 }
 
 function prepareTest(type) {
@@ -162,24 +196,24 @@ function openSetup() {
 
 function setDifficulty(lvl, btn) {
     let btns = document.querySelectorAll('#modal-setup .lvl-btn:nth-child(-n+3)');
-    btns.forEach(b => b.style.opacity = '0.5');
+    btns.forEach(b => b.style.opacity = '0.4');
     btn.style.opacity = '1';
 }
 
 // ==========================================
-// 4. TEST BAZASINI SHAKLLANTIRISH
+// 4. TEST START LOGIC
 // ==========================================
 function applySetup(order) {
     document.getElementById('modal-setup').style.display = 'none';
     isExamMode = false;
     
     let pool = [];
-    if(testType === 'level') pool = [...pendingLevelQs];
+    if(testType === 'level' || testType === 'chapter') pool = [...pendingLevelQs];
     else if(testType === 'mix_800') pool = bank.sort(() => Math.random() - 0.5).slice(0, 20);
-    else if(testType === 'seq_800') pool = bank.slice(0, 20);
     else if(testType === 'errors') pool = bank.filter(q => stats.errors.includes(q.id));
     else if(testType === 'sub_mix') pool = bank.filter(q => q.subject === pendingSubject).sort(() => Math.random()-0.5).slice(0, 20);
     
+    // Tartib: Faqat savollar o'rnini almashtirish
     if(order === 'rand') pool = pool.sort(() => Math.random() - 0.5);
 
     currentTest = pool;
@@ -202,12 +236,13 @@ function startExamMode() {
 }
 
 // ==========================================
-// 5. TEST ENGINE & ANIMATIONS
+// 5. TEST ENGINE & ANIMATIONS (MAGIC)
 // ==========================================
 function startTestSession() {
     switchScreen('screen-dash', 'screen-test');
     currentIdx = 0;
     
+    // Javob variantlari har doim random bo'lishi shart
     currentTest = currentTest.map(q => {
         let shuffledOpts = [...q.originalOpts].sort(() => Math.random() - 0.5);
         let correctIdx = shuffledOpts.indexOf(q.correctText);
@@ -220,7 +255,7 @@ function startTestSession() {
     const timerEl = document.getElementById('exam-timer');
     if(isExamMode) {
         timerEl.style.display = 'block';
-        startTimer(60 * 60); 
+        startTimer(60 * 60); // 60 daqiqa
     } else {
         timerEl.style.display = 'none';
     }
@@ -232,8 +267,7 @@ function startTimer(seconds) {
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         seconds--;
-        let m = Math.floor(seconds/60);
-        let s = seconds % 60;
+        let m = Math.floor(seconds/60); let s = seconds % 60;
         document.getElementById('exam-timer').innerText = `${m}:${s<10?'0':''}${s}`;
         if(seconds <= 0) { clearInterval(timerInterval); showResult(); }
     }, 1000);
@@ -243,7 +277,7 @@ function loadQuestion() {
     const q = currentTest[currentIdx];
     document.getElementById('live-counter').innerText = `Savol: ${currentIdx + 1} / ${currentTest.length}`;
     
-    // Auto-Scroll to Center
+    // Indikator paneldagi raqamni avtomatik markazga surish (Auto Scroll)
     document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
     const activeDot = document.getElementById(`dot-${currentIdx}`);
     if(activeDot) {
@@ -251,7 +285,7 @@ function loadQuestion() {
         activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center' });
     }
 
-    // Casino Spin Animation
+    // Casino Spin Animation (Savol raqami pirillab aylanishi)
     const spin = document.getElementById('casino-spin');
     const qCard = document.getElementById('question-card');
     qCard.classList.remove('shake');
@@ -266,6 +300,7 @@ function loadQuestion() {
         }
     }, 40);
 
+    // Savol matni va variantlarni ekranga chiqarish
     document.getElementById('question-text').innerText = q.q;
     const optBox = document.getElementById('options-box');
     optBox.innerHTML = q.options.map((opt, i) => `
@@ -275,7 +310,7 @@ function loadQuestion() {
 
 function selectAnswer(selectedIdx, btnEl) {
     const allBtns = document.querySelectorAll('.opt-btn');
-    allBtns.forEach(b => b.disabled = true);
+    allBtns.forEach(b => b.disabled = true); // 2 marta bosishdan saqlash
 
     const q = currentTest[currentIdx];
     const isCorrect = (selectedIdx === q.answer);
@@ -285,29 +320,32 @@ function selectAnswer(selectedIdx, btnEl) {
     const qCard = document.getElementById('question-card');
 
     if(isCorrect) {
-        btnEl.style.background = 'var(--success)';
-        btnEl.style.color = '#fff';
+        btnEl.style.background = 'var(--success)'; 
+        btnEl.style.color = '#fff'; 
         btnEl.style.borderColor = 'var(--success)';
-        btnEl.style.boxShadow = '0 0 15px rgba(50, 215, 75, 0.4)';
+        btnEl.style.boxShadow = '0 0 20px rgba(50, 215, 75, 0.5)';
         dot.classList.add('correct');
-        playFeedback('correct');
+        playFeedback('correct'); // Ovoz va vibratsiya
         
         if(!stats.learned.includes(q.id)) stats.learned.push(q.id);
         stats.errors = stats.errors.filter(id => id !== q.id); 
     } else {
-        btnEl.style.background = 'var(--error)';
-        btnEl.style.color = '#fff';
+        btnEl.style.background = 'var(--error)'; 
+        btnEl.style.color = '#fff'; 
         btnEl.style.borderColor = 'var(--error)';
-        qCard.classList.add('shake');
+        btnEl.style.boxShadow = '0 0 20px rgba(255, 69, 58, 0.5)';
+        qCard.classList.add('shake'); // Xato kartasining titrashi
         dot.classList.add('wrong');
-        playFeedback('wrong');
+        playFeedback('wrong'); // Ovoz va vibratsiya
         
         if(!stats.errors.includes(q.id)) stats.errors.push(q.id);
-        // DIQQAT: Xato belgilanganda to'g'ri javob KO'RSATILMAYDI. Shunchaki qizaradi va o'tib ketadi.
+        // DIQQAT: Qoidaga muvofiq, to'g'ri javob ko'rsatilmaydi, shunchaki xato qizarib, o'tib ketadi.
     }
     
+    // Progressni xotiraga yozib qoyish
     localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
 
+    // 1 sekund kutib, keyingi savolga o'tish
     setTimeout(() => {
         if(currentIdx < currentTest.length - 1) {
             currentIdx++;
@@ -315,7 +353,7 @@ function selectAnswer(selectedIdx, btnEl) {
         } else {
             showResult();
         }
-    }, 1000); // 1 soniyadan so'ng avtomatik keyingi savolga o'tish
+    }, 1000); 
 }
 
 // ==========================================
@@ -328,11 +366,11 @@ function showResult() {
     
     document.getElementById('result-percent').innerText = `${percent}%`;
     
-    let msg = "";
-    let color = "";
+    let msg = ""; let color = "";
     
+    // Natijaga qarab psixologik ruxlantirish matnlari va ranglari
     if(percent >= 90) { 
-        msg = "Zo'r! Siz imtihonga to'liq tayyorsiz. 🏆"; 
+        msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; 
         color = "var(--success)"; 
     }
     else if(percent >= 70) { 
@@ -350,7 +388,9 @@ function showResult() {
 
     document.getElementById('result-msg').innerText = msg;
     document.getElementById('result-donut').style.borderColor = color;
+    document.getElementById('result-donut').style.boxShadow = `0 0 30px ${color}`;
     document.getElementById('result-percent').style.color = color;
+    document.getElementById('result-percent').style.textShadow = `0 0 15px ${color}`;
 
     document.getElementById('modal-result').style.display = 'flex';
 }
