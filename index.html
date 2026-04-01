@@ -3,335 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRO EXAM v7.5 Magic & Eye Comfort</title>
+    <title>PRO EXAM v7.5 Ultimate Edition</title>
+    <!-- Confetti kutubxonasi (g'alaba uchun) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         /* =========================================
-           UI/UX: iOS 26 Vision, Eye Comfort & Magic
+           Tizim Ranglari (Eye-Comfort 50% qo'llanilgan)
            ========================================= */
         :root {
-            /* Tungi rejim (Default) */
-            --primary: #0A84FF;
-            --success: #32D74B;
-            --warning: #FFD60A;
-            --error: #FF453A;
-            --bg-dark: #05050A; 
-            --card-bg: rgba(20, 20, 25, 0.65);
-            --text-main: #F2F2F7;
-            --text-muted: #8E8E93;
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --magic-glow: 0 0 25px rgba(10, 132, 255, 0.6);
-            --bg-overlay: linear-gradient(to bottom, rgba(5, 5, 10, 0.88), rgba(5, 5, 10, 0.95));
-        }
-
-        body.light-mode {
-            /* Kungi rejim (Warm Eye Comfort) */
-            --primary: #007AFF;
-            --success: #34C759;
-            --warning: #FF9500;
-            --error: #FF3B30;
-            --bg-dark: #F2F2F7; 
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --text-main: #1C1C1E;
-            --text-muted: #6C6C70;
-            --glass-border: rgba(0, 0, 0, 0.1);
+            /* Kungi rejim (Warm Eye Comfort - Asosiy) */
+            --primary: #007AFF; 
+            --accent: #5E5CE6; 
+            --success: #34C759; 
+            --warning: #FF9500; 
+            --error: #FF3B30; 
+            
+            --bg: #F4F5F0; 
+            --card: #FCFBF8;
+            --text: #2C3E50;
+            --text-sec: #718096;
+            --glass-border: rgba(0,0,0,0.06);
+            --bg-overlay: linear-gradient(to bottom, rgba(244, 245, 240, 0.85), rgba(244, 245, 240, 0.95));
             --magic-glow: 0 0 20px rgba(0, 122, 255, 0.3);
-            --bg-overlay: linear-gradient(to bottom, rgba(242, 242, 247, 0.85), rgba(242, 242, 247, 0.95));
         }
 
-        * {
-            box-sizing: border-box; margin: 0; padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            outline: none;
+        body.dark-mode {
+            /* Tungi rejim (Ko'kish-qora yumshoq ranglar) */
+            --bg: #121418;
+            --card: #1A1D24;
+            --text: #E2E8F0;
+            --text-sec: #A0AEC0;
+            --glass-border: rgba(255,255,255,0.05);
+            --bg-overlay: linear-gradient(to bottom, rgba(18, 20, 24, 0.88), rgba(18, 20, 24, 0.95));
+            --magic-glow: 0 0 25px rgba(10, 132, 255, 0.6);
         }
 
-        body {
-            background-color: var(--bg-dark);
-            background-image: var(--bg-overlay), url('bino.png');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; outline: none; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg);
+            background-image: var(--bg-overlay), url('bino.png'); /* Orqa fon rasm bilan */
             background-size: cover; background-position: center; background-attachment: fixed;
-            color: var(--text-main); overflow-x: hidden; user-select: none;
-            transition: background-color 0.5s, color 0.5s;
+            color: var(--text); 
+            transition: background-color 0.4s, color 0.4s; 
+            overflow-x: hidden; user-select: none; display: flex; flex-direction: column; min-height: 100vh; 
         }
 
-        .glass {
-            background: var(--card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: background 0.5s, border-color 0.5s;
-        }
+        .hidden { display: none !important; }
+        .active { display: flex; flex-direction: column; flex-grow: 1; }
+        .screen { flex-grow: 1; display: flex; flex-direction: column; position: relative;}
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; width: 100%; }
 
-        .screen { display: none; min-height: 100vh; flex-direction: column; position: relative; padding-bottom: 30px; }
-        .screen.active { display: flex; animation: magicFadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        /* Umumiy yozuvlar */
+        .text-primary { color: var(--primary); }
+        .text-success { color: var(--success); }
+        .text-error { color: var(--error); }
+        .max-total { font-size: 0.85rem; color: var(--text-sec); font-weight: normal; }
 
-        @keyframes magicFadeIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(10px); }
-            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-        }
+        /* Adham's Copyright Footer */
+        .app-footer { text-align: center; padding: 15px; font-size: 0.85rem; color: var(--text-sec); font-weight: 500; margin-top: auto; letter-spacing: 0.5px; }
+        .app-footer-welcome { position: absolute; bottom: 15px; width: 100%; text-align: center; font-size: 0.85rem; color: rgba(113, 128, 150, 0.8); font-weight: 500; z-index: 10; }
+        body.dark-mode .app-footer-welcome { color: rgba(255,255,255,0.7); }
 
-        /* WELCOME */
-        #screen-welcome { justify-content: center; align-items: center; padding: 20px; }
-        .hero-card { width: 100%; max-width: 450px; padding: 40px 25px; border-radius: 35px; text-align: center; }
-        .main-logo {
-            width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 20px;
-            border: 2px solid var(--primary); cursor: pointer; animation: pulseGlow 2s infinite alternate;
-        }
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 10px rgba(10, 132, 255, 0.3); }
-            to { box-shadow: var(--magic-glow); border-color: #BF5AF2; }
-        }
-        .hero-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; color: var(--text-main); letter-spacing: 1px; }
-        .premium-input {
-            width: 100%; padding: 18px; border-radius: 20px; border: 1px solid var(--glass-border);
-            background: rgba(120, 120, 128, 0.1); color: var(--text-main); font-size: 1.05rem;
-            text-align: center; margin-bottom: 20px; transition: 0.3s;
-        }
-        .premium-input:focus { border-color: var(--primary); box-shadow: var(--magic-glow); }
-        .btn-start {
-            width: 100%; padding: 18px; border-radius: 20px; background: var(--primary);
-            color: #fff; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer;
-            box-shadow: 0 5px 20px rgba(10, 132, 255, 0.4); transition: transform 0.2s;
-        }
-        .btn-start:active { transform: scale(0.95); }
+        /* Glassmorphism */
+        .glass-effect { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid var(--glass-border); box-shadow: 0 10px 40px rgba(0,0,0,0.06); }
+        body.dark-mode .glass-effect { background: rgba(26, 29, 36, 0.7); border: 1px solid var(--glass-border); }
 
-        /* HEADER & DASHBOARD */
-        .header-sticky {
-            position: sticky; top: 0; z-index: 100; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .theme-toggle {
-            background: rgba(120,120,128,0.2); border: 1px solid var(--glass-border);
-            border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; font-size: 1.1rem; transition: 0.3s;
-        }
-        .logo-text { font-weight: 900; font-size: 1.2rem; cursor: pointer; color: var(--primary); }
-        .progress-badges { display: flex; gap: 8px; }
-        .badge { padding: 6px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; display:flex; align-items:center; gap:5px;}
-        .badge.green { background: rgba(50, 215, 75, 0.15); color: var(--success); }
-        .badge.red { background: rgba(255, 69, 58, 0.15); color: var(--error); }
+        /* Animations */
+        .slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; filter: blur(5px); } to { transform: translateY(0); opacity: 1; filter: blur(0); } }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(0, 122, 255, 0); } 100% { box-shadow: 0 0 0 0; } }
+        .gravity-fall { animation: fallDown 1.5s forwards ease-in; pointer-events: none; }
+        @keyframes fallDown { to { transform: translateY(100vh) rotate(15deg); opacity: 0; } }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 25px 20px; max-width: 800px; margin: 0 auto; width: 100%; }
-        @media (max-width: 450px) { .menu-grid { grid-template-columns: 1fr; } }
-        .menu-btn {
-            background: var(--card-bg); border: 1px solid var(--glass-border); padding: 22px 15px;
-            border-radius: 24px; color: var(--text-main); font-weight: 600; font-size: 0.95rem;
-            text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.3s; position: relative; overflow: hidden;
+        /* 🌟 MAGIC STYLE ANIMATIONS 🌟 */
+        @keyframes magicCorrect {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.8); }
+            50% { transform: scale(1.03); box-shadow: 0 0 25px 5px rgba(52, 199, 89, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
         }
-        .menu-btn:active { transform: scale(0.96); border-color: var(--primary); }
-        .btn-exam {
-            grid-column: 1 / -1; background: linear-gradient(135deg, #BF5AF2, #5E5CE6, #0A84FF);
-            background-size: 200% 200%; animation: gradientMove 5s ease infinite; color: #fff;
-            justify-content: center; font-size: 1.1rem; font-weight: 800; border: none; padding: 22px;
+        @keyframes magicWrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+            40%, 80% { transform: translateX(6px); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
         }
-        @keyframes gradientMove { 0% {background-position:0% 50%} 50% {background-position:100% 50%} 100% {background-position:0% 50%} }
-
-        /* TEST ENGINE */
-        .btn-exit { background: rgba(255, 69, 58, 0.15); color: var(--error); border: none; padding: 8px 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .indicator-scroll { width: 100%; overflow-x: auto; padding: 20px 0; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        .indicator-scroll::-webkit-scrollbar { display: none; }
-        .indicator-track { display: flex; gap: 10px; padding: 0 50vw; }
-        .dot {
-            min-width: 46px; height: 46px; border-radius: 14px; background: rgba(120,120,128,0.1);
-            border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 0.95rem; color: var(--text-muted); transition: 0.4s;
-        }
-        .dot.active { border: 2px solid var(--primary); color: var(--primary); transform: scale(1.2); box-shadow: var(--magic-glow); background: var(--bg-dark); }
-        .dot.correct { background: var(--success); color: #fff; border: none; box-shadow: 0 0 10px rgba(50,215,75,0.4); }
-        .dot.wrong { background: var(--error); color: #fff; border: none; box-shadow: 0 0 10px rgba(255,69,58,0.4); }
-
-        /* 3D Container */
-        .q-container { perspective: 1000px; flex-grow: 1; padding: 10px 20px; display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: 0 auto; width: 100%; }
-        .q-card {
-            width: 100%; padding: 35px 20px; border-radius: 30px; text-align: center; margin-bottom: 25px; 
-            min-height: 180px; display: flex; flex-direction: column; justify-content: center; 
-            transition: transform 0.1s ease-out, background 0.5s; /* 3D effect transition */
-            transform-style: preserve-3d;
-        }
-        .spin-box { font-size: 1.2rem; color: var(--primary); font-weight: 900; margin-bottom: 15px; height: 26px; }
-        .q-text { font-size: 1.25rem; font-weight: 600; line-height: 1.5; transform: translateZ(30px); /* 3D Pop */ }
-
-        .options-grid { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .opt-btn {
-            background: rgba(120,120,128,0.1); border: 1px solid var(--glass-border); padding: 20px;
-            border-radius: 20px; color: var(--text-main); font-size: 1.05rem; font-weight: 500;
-            text-align: left; cursor: pointer; transition: all 0.3s;
-        }
-        .opt-btn:active { transform: scale(0.98); }
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
-
+        .magic-correct { animation: magicCorrect 0.6s ease-out forwards; background: rgba(52, 199, 89, 0.15) !important; border-color: var(--success) !important; color: var(--success) !important; }
+        .magic-wrong { animation: magicWrong 0.5s ease-out forwards; background: rgba(255, 59, 48, 0.15) !important; border-color: var(--error) !important; color: var(--error) !important; text-decoration: line-through; opacity: 0.8; }
+        
         /* Magic Particles */
-        .magic-particle {
-            position: fixed; width: 8px; height: 8px; background: var(--success);
-            border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 12px var(--success);
+        .magic-particle { position: fixed; width: 8px; height: 8px; background: var(--success); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 12px var(--success); }
+
+        /* Welcome Screen */
+        .hero-overlay { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; }
+        .hero-card { width: 100%; max-width: 550px; text-align: center; padding: 40px 25px; border-radius: 35px; z-index: 2; margin-bottom: 30px; }
+        
+        /* Dumaloq Logo */
+        .main-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 2px solid var(--primary); cursor: pointer; animation: pulseGlow 2s infinite alternate; }
+        @keyframes pulseGlow { from { box-shadow: 0 0 10px rgba(0, 122, 255, 0.3); } to { box-shadow: var(--magic-glow); border-color: var(--accent); } }
+
+        .hero-badge { background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin-bottom: 15px; font-weight: 600; }
+        .main-title { font-size: 2.3rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -0.5px; }
+        .hero-subtitle { font-size: 1rem; opacity: 0.9; margin-bottom: 25px; line-height: 1.5; }
+        .rules-box { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 15px; text-align: left; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6; border: 1px solid var(--glass-border); }
+        body.dark-mode .rules-box { background: rgba(255,255,255,0.05); }
+        .premium-input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 15px; font-size: 1.05rem; text-align: center; background: var(--card); color: var(--text); font-weight: 600; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
+        .premium-input:focus { box-shadow: 0 0 0 3px rgba(0,122,255,0.3); }
+        .btn-start { width: 100%; padding: 18px; border-radius: 18px; background: var(--primary); color: white; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
+        .btn-start:active { transform: scale(0.96); }
+
+        /* Ijtimoiy tarmoqlar */
+        .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+        .social-btn { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--card); box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s ease; text-decoration: none; border: 1px solid var(--glass-border); }
+        .social-btn img { width: 22px; height: 22px; object-fit: contain; }
+        .social-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+        /* Navigatsiya */
+        .global-nav { padding: 12px 20px; background: var(--glass-effect); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--glass-border); }
+        .nav-logo-mini { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; vertical-align: middle; border: 1px solid var(--primary); }
+        .logo-text { font-weight: 800; font-size: 1rem; color: var(--text); margin-left: 8px; cursor: pointer; vertical-align: middle; }
+        .badge { font-size: 0.6rem; background: var(--error); color: white; padding: 2px 6px; border-radius: 8px; vertical-align: top; }
+        .nav-right { display: flex; gap: 10px; align-items: center; }
+        .timer-badge { background: var(--error); color: white; padding: 6px 10px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; font-family: ui-monospace, monospace; }
+        .exit-mini { background: rgba(255, 59, 48, 0.1); color: var(--error); border: none; padding: 8px 12px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.2s;}
+        .exit-mini:active { transform: scale(0.9); }
+        .theme-btn { background: var(--card); border: 1px solid var(--glass-border); padding: 8px 12px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; font-size: 1rem; transition: 0.2s;}
+
+        /* Dashboard Grid */
+        .dash-header { margin-bottom: 25px; margin-top: 10px; }
+        .stats-row { display: flex; gap: 15px; margin-top: 15px; }
+        .stat-card { flex: 1; background: var(--card); padding: 20px; border-radius: 20px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid var(--glass-border); }
+        .stat-card b { font-size: 1.6rem; display: block; margin-top: 5px; }
+
+        .category-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .cat-btn { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--glass-border); color: var(--text); font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s; text-align: left;}
+        .cat-btn:active { transform: scale(0.97); }
+        .btn-special { background: var(--card); color: var(--primary); border: 2px solid var(--primary); text-align: center;}
+        .btn-outline { background: transparent; border: 2px solid var(--text-sec); color: var(--text); text-align: center;}
+        .btn-error { background: rgba(255, 59, 48, 0.1); color: var(--error); border-color: rgba(255, 59, 48, 0.2); text-align: center;}
+        .btn-error:disabled { opacity: 0.5; background: var(--card); color: var(--text-sec); border-color: var(--glass-border); cursor: not-allowed; }
+        .btn-exam { background: linear-gradient(135deg, var(--accent), var(--primary)); color: white; border: none; text-align: center; font-size: 1.05rem; }
+
+        /* Setup / Modal Screens */
+        .setup-container { display: flex; align-items: center; justify-content: center; min-height: 75vh; }
+        .setup-card { width: 100%; max-width: 480px; padding: 30px; border-radius: 25px; color: var(--text); }
+        .setup-card h2 { text-align: center; margin-bottom: 25px; font-size: 1.5rem; }
+        .setup-group { margin-bottom: 25px; }
+        .setup-group label { font-weight: 600; margin-bottom: 12px; display: block; font-size: 1rem; }
+        .segmented-control { display: flex; background: rgba(0, 0, 0, 0.05); border-radius: 14px; padding: 4px; gap: 4px; }
+        body.dark-mode .segmented-control { background: rgba(255,255,255,0.05); }
+        .flex-col { flex-direction: column; }
+        .seg-btn { flex: 1; padding: 12px; border: 2px solid transparent; background: transparent; border-radius: 12px; font-weight: 600; font-size: 0.9rem; color: var(--text-sec); transition: 0.3s; cursor: pointer; text-align: center; }
+        .order-opt { text-align: left; padding-left: 20px; }
+
+        /* Setup Colors */
+        .diff-easy { color: var(--success); border-color: rgba(52, 199, 89, 0.3); }
+        .diff-easy.active { background: var(--success); color: white; border-color: var(--success); box-shadow: 0 3px 10px rgba(52,199,89,0.3); }
+        .diff-medium { color: var(--warning); border-color: rgba(255, 149, 0, 0.3); }
+        .diff-medium.active { background: var(--warning); color: white; border-color: var(--warning); box-shadow: 0 3px 10px rgba(255,149,0,0.3); }
+        .diff-hard { color: var(--error); border-color: rgba(255, 59, 48, 0.3); }
+        .diff-hard.active { background: var(--error); color: white; border-color: var(--error); box-shadow: 0 3px 10px rgba(255,59,48,0.3); }
+        .order-random.active, .order-seq.active { background: var(--card); color: var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.05); border-color: transparent; }
+
+        .small-note { font-size: 0.8rem; color: var(--text-sec); margin-top: 10px; font-style: italic; }
+        .setup-actions { display: flex; gap: 15px; margin-top: 30px; }
+        .btn-cancel, .btn-start-test { flex: 1; padding: 16px; border-radius: 16px; border: none; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: 0.2s; }
+        .btn-cancel { background: rgba(0, 0, 0, 0.05); color: var(--text); }
+        body.dark-mode .btn-cancel { background: rgba(255,255,255,0.1); }
+        .btn-start-test { background: var(--primary); color: white; }
+
+        /* 🌟 TEST LAYOUT (BLUR LIST METHOD) 🌟 */
+        .progress-bar-container { height: 6px; background: rgba(0,0,0,0.05); width: 100%; position: sticky; top: 60px; z-index: 999; }
+        body.dark-mode .progress-bar-container { background: rgba(255,255,255,0.05); }
+        #progress-fill { height: 100%; background: var(--success); width: 0%; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .test-layout { display: flex; flex-direction: column; gap: 20px; padding-top: 20px; flex-grow: 1; }
+
+        .only-pc { display: none; }
+        .map-container { overflow-x: auto; white-space: nowrap; padding-bottom: 10px; width: 100%; -webkit-overflow-scrolling: touch; }
+        .mini-map { display: inline-flex; gap: 8px; padding: 2px; }
+        .dot { min-width: 38px; height: 38px; border-radius: 12px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--glass-border); cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .dot.active-dot { border: 2px solid var(--primary); color: var(--primary); transform: scale(1.1); box-shadow: var(--magic-glow); }
+        .dot.correct { background: var(--success); color: white; border: none; }
+        .dot.wrong { background: var(--error); color: white; border: none; }
+
+        .question-container { flex: 1; display: flex; flex-direction: column; }
+        .q-list-wrapper { height: 65vh; overflow-y: auto; scroll-behavior: smooth; padding: 10px 5px; flex-grow: 1; }
+        .q-list-wrapper::-webkit-scrollbar { width: 6px; }
+        .q-list-wrapper::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+        body.dark-mode .q-list-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+
+        .q-block { 
+            background: var(--card); padding: 25px 20px; border-radius: 25px; margin-bottom: 25px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04); border: 2px solid transparent;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Modals */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-content { width: 100%; max-width: 400px; padding: 25px; border-radius: 35px; max-height: 80vh; overflow-y: auto;}
+        /* Blur Logic */
+        .q-block.blurred-q { opacity: 0.4; filter: blur(3.5px); transform: scale(0.96); pointer-events: none; }
+        .q-block.active-q { opacity: 1; filter: blur(0); transform: scale(1); pointer-events: auto; border-color: rgba(0, 122, 255, 0.2); box-shadow: 0 12px 35px rgba(0, 122, 255, 0.08); }
+
+        /* Casino Spin Indicator in Block */
+        .spin-box { font-size: 1.1rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; display: inline-block;}
+        .q-meta { color: var(--text-sec); font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
+        
+        .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 25px; line-height: 1.4; }
+        .option-btn { width: 100%; padding: 16px 20px; margin-bottom: 12px; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--bg); text-align: left; font-size: 1.05rem; font-weight: 600; cursor: pointer; color: var(--text); transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .option-btn:active:not(:disabled) { transform: scale(0.98); background: rgba(0,122,255,0.08); }
+
+        .scroll-pad { height: 35vh; } 
+        .nav-controls { display: flex; gap: 15px; margin-top: 15px; padding-bottom: 10px; }
+        .nav-btn { flex: 1; padding: 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--glass-border); color: var(--primary); font-weight: 700; font-size: 1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; }
+        .nav-btn:active { transform: scale(0.96); }
+        .finish-btn { flex: 2; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 16px; font-size: 1rem; cursor: pointer;}
+
+        /* Modals (Levels / Chapters / Results) */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { width: 100%; max-width: 450px; padding: 25px; border-radius: 35px; max-height: 85vh; overflow-y: auto; background: var(--card); border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.2);}
         .modal-content::-webkit-scrollbar { display: none; }
         .level-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .lvl-btn { padding: 15px; border-radius: 18px; background: rgba(120,120,128,0.1); border: 1px solid var(--glass-border); color: var(--text-main); font-weight: 700; cursor: pointer; transition: 0.2s; }
-        
-        .donut {
-            width: 140px; height: 140px; border-radius: 50%; border: 12px solid var(--glass-border);
-            margin: 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-        }
+        .lvl-btn { padding: 15px; border-radius: 18px; background: var(--bg); border: 1px solid var(--glass-border); color: var(--text); font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .lvl-btn:active { transform: scale(0.95); border-color: var(--primary); }
+
+        .donut { width: 140px; height: 140px; border-radius: 50%; border: 12px solid var(--glass-border); margin: 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); }
         .donut span { font-size: 2.2rem; font-weight: 900; }
         .res-msg { text-align: center; font-size: 1.1rem; font-weight: 700; margin-bottom: 25px; line-height: 1.4;}
+
+        /* PC Layout */
+        @media (min-width: 768px) {
+            .category-grid { grid-template-columns: repeat(2, 1fr); }
+            .q-text { font-size: 1.35rem; }
+            .test-layout { flex-direction: row; align-items: flex-start; gap: 30px; height: calc(100vh - 120px); overflow: hidden; }
+            .map-container { width: 260px; overflow-y: auto; overflow-x: hidden; white-space: normal; height: 100%; padding-right: 10px; border-right: 1px solid var(--glass-border); }
+            .only-pc { display: block; font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; color: var(--text); }
+            .mini-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+            .question-container { flex: 1; height: 100%; display: flex; flex-direction: column; }
+            .q-list-wrapper { height: auto; flex: 1; padding-right: 20px; }
+            .q-block { padding: 35px 30px; }
+        }
+        @media (min-width: 1024px) {
+            .category-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+            .btn-special, .btn-outline, .btn-error, .btn-exam { grid-column: span 1; }
+            .map-container { width: 300px; }
+            .mini-map { grid-template-columns: repeat(5, 1fr); }
+        }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body class="light-mode" id="main-body" oncontextmenu="return false;">
 
-    <!-- 1. WELCOME -->
-    <div id="screen-welcome" class="screen active">
-        <div class="hero-card glass">
-            <img src="logo.png" class="main-logo" alt="Logo" onclick="location.reload()" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <h1 class="hero-title">PRO EXAM</h1>
-            <p class="hero-subtitle">Bu yerda siz imtihonga tayyor bo'lasiz. Real test muhitida mashq qiling va natijangizni oshiring.</p>
-            <input type="text" id="student-name" class="premium-input" placeholder="Ismingizni kiriting..." autocomplete="off">
-            <button class="btn-start" onclick="login()">Boshlash 🚀</button>
-        </div>
-    </div>
+    <!-- 1. WELCOME SCREEN -->
+    <div id="welcome-screen" class="screen active">
+        <div class="hero-overlay">
+            <div class="hero-card glass-effect slide-up">
+                <img src="logo.png" alt="Logo" class="main-logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+                <div class="hero-badge">Shaxsiy Loyiha</div>
+                <h1 class="main-title">Xush kelibsiz!</h1>
+                <p class="hero-subtitle">
+                    Bu sayt nima vazifani bajaradi? Ushbu platforma mening shaxsiy loyiham bo'lib, sizni yakuniy imtihonlarga mukammal tayyorlash, bilimlaringizni sinash va xatolar ustida mustaqil ishlash imkoniyatini beradi.<br><br>
+                    <b>Talabalar uchun maxsus ishlab chiqilgan professional tayyorgarlik tizimi.</b>
+                </p>
+                <div class="rules-box">
+                    <p>✅ <b>Qoida:</b> Testni yakunlash uchun o'zingizni sinab ko'ring.</p>
+                    <p>✅ <b>Yashirin Javob:</b> Xato qilsangiz, to'g'ri javob ko'rsatilmaydi! Mustaqil izlab topishingiz zarur.</p>
+                </div>
+                
+                <div class="login-form">
+                    <input type="text" id="student-name" class="premium-input" placeholder="Ism familiyangizni kiriting..." autocomplete="off">
+                    <button class="btn-start pulse" onclick="handleLogin()">Platformaga kirish</button>
+                </div>
 
-    <!-- 2. DASHBOARD -->
-    <div id="screen-dash" class="screen">
-        <div class="header-sticky glass">
-            <div class="logo-text" onclick="location.reload()">PRO EXAM</div>
-            <div class="header-right">
-                <button class="theme-toggle" onclick="toggleTheme()" title="Eye Comfort">🌗</button>
-                <div class="progress-badges">
-                    <div class="badge green">✅ <span id="dash-learned">0</span></div>
-                    <div class="badge red">❌ <span id="dash-errors">0</span></div>
+                <div class="social-links">
+                    <a href="https://t.me/atamuratovs" target="_blank" class="social-btn"><img src="tg.png" alt="TG" onerror="this.style.display='none'"></a>
+                    <a href="https://www.instagram.com/strovln" target="_blank" class="social-btn"><img src="insta.png" alt="IG" onerror="this.style.display='none'"></a>
                 </div>
             </div>
-        </div>
-
-        <div class="menu-grid">
-            <button class="menu-btn" onclick="openLevels('musiqa_nazariyasi', 'Musiqa nazariyasi')">🎼 Musiqa nazariyasi <span>›</span></button>
-            <button class="menu-btn" onclick="openLevels('cholgu_ijrochiligi', 'Cholg\'u ijrochiligi')">🎻 Cholg'u ijrochiligi <span>›</span></button>
-            <button class="menu-btn" onclick="openLevels('vokal_ijrochiligi', 'Vokal ijrochiligi')">🎤 Vokal ijrochiligi <span>›</span></button>
-            <button class="menu-btn" onclick="openLevels('metodika_repertuar', 'Metodika')">📚 Metodika <span>›</span></button>
-            
-            <button class="menu-btn" style="justify-content:center; color:var(--primary);" onclick="prepareTest('mix_800')">🎲 1-800 Aralash</button>
-            <button class="menu-btn" style="justify-content:center;" onclick="openChapters()">📑 Bo'limlar (Boblar)</button>
-            <button class="menu-btn" style="justify-content:center; color:var(--error);" onclick="prepareTest('errors')">🛠 Xatolar ustida ishlash</button>
-            <button class="menu-btn btn-exam" onclick="startExamMode()">🎓 IMTIHON MODE (60)</button>
+            <footer class="app-footer-welcome">Adham's copyright 2026 &copy;</footer>
         </div>
     </div>
 
-    <!-- 3. TEST SCREEN -->
-    <div id="screen-test" class="screen">
-        <div class="header-sticky glass">
-            <button class="btn-exit" onclick="confirmExit()">🚪 Chiqish</button>
-            <div id="live-counter" style="font-weight:800;">Savol: 1 / 20</div>
-            <div class="header-right">
-                <button class="theme-toggle" onclick="toggleTheme()">🌗</button>
-                <div id="exam-timer" style="font-weight:800; color:var(--warning); display:none;">00:00</div>
+    <!-- 2. GLOBAL NAV -->
+    <nav class="global-nav hidden" id="global-nav">
+        <div class="logo-area" onclick="logout()" title="Bosh sahifa / Chiqish">
+            <img src="logo.png" alt="Logo" class="nav-logo-mini" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+            <span class="logo-text">PRO EXAM <span class="badge">v7.5</span></span>
+        </div>
+        <div class="nav-right">
+            <button id="exit-test-btn" class="exit-mini hidden" onclick="confirmExit()">🚪 Chiqish</button>
+            <div id="exam-timer" class="timer-badge hidden">00:00</div>
+            <button onclick="toggleTheme()" class="theme-btn" title="Kungi/Tungi rejim">🌗</button>
+        </div>
+    </nav>
+
+    <!-- 3. DASHBOARD -->
+    <div id="dashboard-screen" class="screen hidden">
+        <div class="container main-content">
+            <header class="dash-header slide-up">
+                <h2>Salom, <span id="display-name" class="text-primary">Talaba</span>!</h2>
+                <div class="stats-row">
+                    <div class="stat-card">O'zlashtirildi: <b id="learned-count" class="text-success">0</b> <span class="max-total" id="max-learned-total">/ 800</span></div>
+                    <div class="stat-card">Xatolar: <b id="error-count" class="text-error">0</b></div>
+                </div>
+            </header>
+
+            <div class="category-grid slide-up">
+                <button class="cat-btn" onclick="openLevels('musiqa_nazariyasi', 'Musiqa nazariyasi')">🎼 Musiqa nazariyasi</button>
+                <button class="cat-btn" onclick="openLevels('cholgu_ijrochiligi', 'Cholg\'u ijrochiligi')">🎻 Cholg'u ijrochiligi</button>
+                <button class="cat-btn" onclick="openLevels('vokal_ijrochiligi', 'Vokal ijrochiligi')">🎤 Vokal ijrochiligi</button>
+                <button class="cat-btn" onclick="openLevels('metodika_repertuar', 'Metodika')">📚 Metodika</button>
+                
+                <button class="cat-btn btn-special" onclick="prepareTest('mix_800')">🎲 1-800 Aralash</button>
+                <button class="cat-btn btn-outline" onclick="openChapters()">📑 Bo'limlar (Boblar)</button>
+                <button id="error-work-btn" class="cat-btn btn-error" onclick="prepareTest('errors')" disabled>🛠 Xatolar ustida ishlash</button>
+                <button class="cat-btn btn-exam pulse" onclick="startExamMode()">🎓 IMTIHON MODE (60)</button>
             </div>
         </div>
-
-        <div class="indicator-scroll" id="auto-scroll-box">
-            <div class="indicator-track" id="dot-track"></div>
-        </div>
-
-        <div class="q-container">
-            <div id="question-card" class="q-card glass">
-                <div id="casino-spin" class="spin-box">1</div>
-                <div id="question-text" class="q-text">Yuklanmoqda...</div>
-            </div>
-            <div class="options-grid" id="options-box"></div>
-        </div>
+        <footer class="app-footer">Adham's copyright 2026 &copy;</footer>
     </div>
 
-    <!-- MODALS -->
+    <!-- 4. MODALS (Setup, Levels, Chapters, Result) -->
+    <!-- Levels Modal -->
     <div id="modal-level" class="modal-overlay" onclick="closeModal(event, 'modal-level')">
-        <div class="modal-content glass">
+        <div class="modal-content">
             <h2 id="modal-subject-title" style="margin-bottom: 15px; font-weight:800; text-align:center;">Fan</h2>
             <div class="level-grid" id="level-grid-box"></div>
-            <button class="btn-start" style="margin-top:15px; background:rgba(120,120,128,0.2); color:var(--primary);" onclick="prepareTest('sub_mix')">🎲 Fandan Aralash</button>
+            <button class="btn-start" style="margin-top:15px; background:var(--bg); border:2px solid var(--primary); color:var(--primary);" onclick="prepareTest('sub_mix')">🎲 Fandan Aralash</button>
         </div>
     </div>
 
+    <!-- Chapters Modal -->
     <div id="modal-chapters" class="modal-overlay" onclick="closeModal(event, 'modal-chapters')">
-        <div class="modal-content glass">
+        <div class="modal-content">
             <h2 style="margin-bottom: 15px; font-weight:800; text-align:center;">Barcha Boblar</h2>
-            <p style="text-align:center; color:var(--text-muted); font-size:0.9rem; margin-bottom:15px;">Ketma-ketlikda yechish</p>
+            <p style="text-align:center; color:var(--text-sec); font-size:0.9rem; margin-bottom:15px;">Dinamik 800 talik baza</p>
             <div class="level-grid" id="chapters-grid-box"></div>
         </div>
     </div>
 
-    <div id="modal-setup" class="modal-overlay" onclick="closeModal(event, 'modal-setup')">
-        <div class="modal-content glass">
-            <h3 style="text-align:center; margin-bottom:20px; font-weight:900;">Sozlamalar</h3>
-            <p style="color:var(--text-muted); margin-bottom:10px; font-weight:600; font-size:0.9rem;">Qiyinlik darajasi:</p>
-            <div style="display:flex; gap:10px; margin-bottom:25px;">
-                <button class="lvl-btn" style="flex:1; border-color:var(--success); color:var(--success);" onclick="setDifficulty(this)">Oson</button>
-                <button class="lvl-btn" style="flex:1; border-color:var(--warning); color:var(--warning);" onclick="setDifficulty(this)">O'rta</button>
-                <button class="lvl-btn" style="flex:1; border-color:var(--error); color:var(--error);" onclick="setDifficulty(this)">Qiyin</button>
+    <!-- Setup Modal -->
+    <div id="setup-screen" class="modal-overlay" onclick="closeModal(event, 'setup-screen')">
+        <div class="modal-content">
+            <h2 style="text-align: center; margin-bottom: 25px; font-size: 1.5rem;">⚙️ Test Parametrlari</h2>
+            <div class="setup-group">
+                <label>Qiyinlik darajasi (Vaqt):</label>
+                <div class="segmented-control difficulty-control">
+                    <button class="seg-btn diff-easy active" onclick="setDifficulty('easy', this)">Oson</button>
+                    <button class="seg-btn diff-medium" onclick="setDifficulty('medium', this)">O'rtacha</button>
+                    <button class="seg-btn diff-hard" onclick="setDifficulty('hard', this)">Qiyin</button>
+                </div>
             </div>
-            <p style="color:var(--text-muted); margin-bottom:10px; font-weight:600; font-size:0.9rem;">Ushbu qism uchun tartib:</p>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="lvl-btn" onclick="applySetup('rand')">🎲 Aralash (Random)</button>
-                <button class="lvl-btn" onclick="applySetup('seq')">⬇️ Ketma-ketlikda</button>
+            <div class="setup-group">
+                <label>Ushbu qism uchun tartib:</label>
+                <div class="segmented-control order-control flex-col">
+                    <button class="seg-btn order-opt order-random active" onclick="setOrder('random', this)">🎲 Savollarni aralashtirish</button>
+                    <button class="seg-btn order-opt order-seq" onclick="setOrder('seq', this)">⬇️ Ketma-ketlikda yechish</button>
+                </div>
+                <p class="small-note">*Eslatma: Variantlar (A, B, C, D) doim aralashtiriladi!</p>
+            </div>
+            <div class="setup-actions">
+                <button class="btn-cancel" onclick="closeModalDirect('setup-screen')">Bekor qilish</button>
+                <button class="btn-start-test" onclick="applySetup()">Boshlash 🚀</button>
             </div>
         </div>
     </div>
 
+    <!-- Result Modal -->
     <div id="modal-result" class="modal-overlay">
-        <div class="modal-content glass">
-            <h2 style="text-align:center; font-weight:900;">Natija</h2>
+        <div class="modal-content text-center">
+            <h2 style="font-weight:900;">Natija</h2>
             <div class="donut" id="result-donut"><span id="result-percent">0%</span></div>
             <p class="res-msg" id="result-msg">Xabar</p>
-            <button class="btn-start" onclick="goHome()">Asosiy menyuga qaytish</button>
+            <button class="btn-start" style="margin-top:10px;" onclick="goHome()">Asosiy menyuga qaytish</button>
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
+    <!-- 5. TEST SCREEN (BLUR LIST METHOD) -->
+    <div id="test-screen" class="screen hidden">
+        <div class="progress-bar-container"><div id="progress-fill"></div></div>
+        
+        <div class="container test-layout">
+            <div class="map-container">
+                <div class="map-title only-pc">Savollar xaritasi</div>
+                <div id="indicator-map" class="mini-map"></div>
+            </div>
+
+            <div class="question-container">
+                <div id="question-list-wrapper" class="q-list-wrapper">
+                    <div id="all-questions-area"></div>
+                    <div class="scroll-pad"></div> 
+                </div>
+                
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="move(-1)">⬅️ Oldingi</button>
+                    <button id="finish-btn" class="finish-btn hidden" onclick="finishExam()">Tugatish ✔️</button>
+                    <button class="nav-btn" onclick="move(1)">Keyingi ➡️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- Day/Night Eye Comfort ---
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-        }
-
-        // --- 3D Hover Magic (Faqat PC da seziladi) ---
-        document.addEventListener('mousemove', (e) => {
-            const card = document.getElementById('question-card');
-            if(document.getElementById('screen-test').classList.contains('active')) {
-                let xAxis = (window.innerWidth / 2 - e.pageX) / 40;
-                let yAxis = (window.innerHeight / 2 - e.pageY) / 40;
-                card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-            }
-        });
-
-        // --- Magic Particle Burst ---
-        function createParticles(x, y) {
-            for (let i = 0; i < 12; i++) {
-                let p = document.createElement('div');
-                p.className = 'magic-particle';
-                document.body.appendChild(p);
-                let destX = x + (Math.random() - 0.5) * 120;
-                let destY = y + (Math.random() - 0.5) * 120;
-                p.style.left = x + 'px'; p.style.top = y + 'px';
-                p.animate([
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                    { transform: `translate(${destX - x}px, ${destY - y}px) scale(0)`, opacity: 0 }
-                ], { duration: 600, easing: 'ease-out' });
-                setTimeout(() => p.remove(), 600);
-            }
-        }
-
-        // --- Audio & Vibration ---
+        // ==========================================
+        // AUDIO, VIBRATION & PARTICLES (MAGIC TRICKS)
+        // ==========================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playFeedback(type) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            
             if(type === 'correct') {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
@@ -347,14 +427,42 @@
             }
         }
 
-        // --- Global Vars ---
-        let bank = []; 
-        let currentTest = []; let currentIdx = 0;
-        let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
-        let timerInterval; let pendingSubject = null; let pendingLevelQs = [];
-        let isExamMode = false; let testType = null;
+        function createParticles(event) {
+            if(!event) return;
+            const x = event.clientX; const y = event.clientY;
+            for (let i = 0; i < 12; i++) {
+                let p = document.createElement('div'); p.className = 'magic-particle'; document.body.appendChild(p);
+                let destX = x + (Math.random() - 0.5) * 120; let destY = y + (Math.random() - 0.5) * 120;
+                p.style.left = x + 'px'; p.style.top = y + 'px';
+                p.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${destX - x}px, ${destY - y}px) scale(0)`, opacity: 0 }
+                ], { duration: 600, easing: 'ease-out' });
+                setTimeout(() => p.remove(), 600);
+            }
+        }
 
-        // --- 1. Load Data ---
+        // ==========================================
+        // GHOSTBUSTER (Tozalash)
+        // ==========================================
+        function forceCloseAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+        function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
+        function closeModalDirect(id) { document.getElementById(id).style.display = 'none'; }
+
+        // ==========================================
+        // GLOBAL VARIABLES
+        // ==========================================
+        let bank = []; let currentTest = []; let userAnswers = []; let currentIndex = 0;
+        let currentUser = null; let timerInterval;
+        let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: [], errors: [] };
+        let pendingSubject = null; let pendingLevelQs = []; let testType = null;
+        let diffTime = 900; let orderMode = 'random'; let isExamMode = false;
+
+        // ==========================================
+        // 1. DATA YUKLASH
+        // ==========================================
         async function loadData() {
             const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
             let globalId = 1;
@@ -363,47 +471,80 @@
                     const res = await fetch(f); const data = await res.json();
                     const subName = f.replace('.json', '');
                     data.forEach(q => {
-                        let opts = q.options.filter(o => o !== null && o.toString().trim() !== '');
-                        let correctText = q.options[q.answer]; 
-                        if(opts.length === 3) opts.push("Barcha javoblar to'g'ri");
-                        bank.push({ id: globalId++, subject: subName, q: q.q, originalOpts: opts, correctText: correctText });
+                        let opts = q.options.filter(o => o !== null && o !== undefined && o.toString().trim() !== '');
+                        let uniqueOpts = [...new Set(opts)];
+                        let correctText = q.options[q.answer];
+                        if(uniqueOpts.length === 3) uniqueOpts.push("Barcha javoblar to'g'ri");
+                        
+                        bank.push({ id: globalId++, subject: subName, q: q.q, originalOpts: uniqueOpts, correctText: correctText });
                     });
-                } catch(e) { console.warn(f + " yuklanmadi."); }
+                } catch(e) { console.warn(f + " topilmadi"); }
             }
-            document.getElementById('dash-learned').parentNode.innerHTML = `✅ <span id="dash-learned">${stats.learned.length}</span> / ${bank.length}`;
+            document.getElementById('max-learned-total').innerText = `/ ${bank.length}`;
             updateDashboardStats();
         }
-        window.onload = loadData;
+        window.onload = () => {
+            loadData();
+            if (localStorage.getItem('theme') === 'dark') document.body.classList.replace('light-mode', 'dark-mode');
+        };
 
-        // --- 2. Screens ---
-        function switchScreen(hideId, showId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(showId).classList.add('active');
+        // ==========================================
+        // 2. EKRANLAR VA MENYU BOSHQRUVI
+        // ==========================================
+        function toggleTheme() { 
+            let isDark = document.body.classList.contains('dark-mode');
+            if(isDark) { document.body.classList.replace('dark-mode', 'light-mode'); localStorage.setItem('theme', 'light'); }
+            else { document.body.classList.replace('light-mode', 'dark-mode'); localStorage.setItem('theme', 'dark'); }
         }
-        function login() {
+
+        function switchScreen(hideId, showId) {
+            forceCloseAllModals();
+            document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.classList.add('hidden'); });
+            const target = document.getElementById(showId);
+            target.classList.remove('hidden'); target.classList.add('active');
+        }
+
+        function handleLogin() {
             const name = document.getElementById('student-name').value.trim();
             if(name.length < 2) return alert("Ismingizni kiriting!");
+            currentUser = name; document.getElementById('display-name').innerText = name;
             if(audioCtx.state === 'suspended') audioCtx.resume();
-            switchScreen('screen-welcome', 'screen-dash');
+            document.getElementById('global-nav').classList.remove('hidden');
+            switchScreen('welcome-screen', 'dashboard-screen');
         }
-        function goHome() { clearInterval(timerInterval); document.getElementById('modal-result').style.display = 'none'; switchScreen('screen-test', 'screen-dash'); updateDashboardStats(); }
-        function confirmExit() { if(confirm("Testdan chiqishni xohlaysizmi?")) goHome(); }
-        function updateDashboardStats() {
-            let l = document.getElementById('dash-learned'); if(l) l.innerText = stats.learned.length;
-            let e = document.getElementById('dash-errors'); if(e) e.innerText = stats.errors.length;
-        }
-        function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
 
-        // --- 3. Levels & Chapters ---
+        function goHome() { 
+            clearInterval(timerInterval); forceCloseAllModals();
+            document.getElementById('exit-test-btn').classList.add('hidden');
+            document.getElementById('exam-timer').classList.add('hidden');
+            switchScreen('test-screen', 'dashboard-screen'); 
+            updateDashboardStats(); 
+        }
+        function confirmExit() { if(confirm("Testdan chiqishni xohlaysizmi?")) goHome(); }
+        function logout() { if(confirm("Tizimdan chiqishni xohlaysizmi?")) location.reload(); }
+
+        function updateDashboardStats() {
+            stats.learned = [...new Set(stats.learned)]; stats.errors = [...new Set(stats.errors)];
+            localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
+            document.getElementById('learned-count').innerText = stats.learned.length;
+            document.getElementById('error-count').innerText = stats.errors.length;
+            document.getElementById('error-work-btn').disabled = stats.errors.length === 0;
+        }
+
+        // ==========================================
+        // 3. LEVEL & CHAPTERS (MODALS)
+        // ==========================================
         function openLevels(sub, title) {
-            pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
+            forceCloseAllModals(); pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
             const grid = document.getElementById('level-grid-box'); grid.innerHTML = '';
             let subQs = bank.filter(q => q.subject === sub);
             for(let i=0; i<10; i++) {
                 let start = i * 20; let end = start + 20;
                 if(start >= subQs.length) break;
                 let btn = document.createElement('button'); btn.className = 'lvl-btn';
-                btn.innerHTML = `${i+1}-LVL <br><span style="font-size:0.8rem; opacity:0.7">${start+1}-${end}</span>`;
+                let learned = subQs.slice(start, end).filter(q => stats.learned.includes(q.id)).length;
+                let isFull = learned === (end - start);
+                btn.innerHTML = `<b>${i+1}-LVL</b> <span style="font-size:0.8rem; color:${isFull ? 'var(--success)' : 'var(--text-sec)'}">${learned}/${end-start} ✅</span>`;
                 btn.onclick = () => { pendingLevelQs = subQs.slice(start, end); testType = 'level'; openSetup(); };
                 grid.appendChild(btn);
             }
@@ -411,8 +552,7 @@
         }
 
         function openChapters() {
-            const grid = document.getElementById('chapters-grid-box'); grid.innerHTML = '';
-            // Bug Fix: Xotirada bazani ID boyicha toza holda ushlaymiz
+            forceCloseAllModals(); const grid = document.getElementById('chapters-grid-box'); grid.innerHTML = '';
             const cleanBank = [...bank].sort((a,b) => a.id - b.id);
             const chunks = Math.ceil(cleanBank.length / 20);
             for(let i=0; i<chunks; i++) {
@@ -421,29 +561,36 @@
                 let learned = chunkQs.filter(q => stats.learned.includes(q.id)).length;
                 let isFull = learned === (end - start);
                 let btn = document.createElement('button'); btn.className = 'lvl-btn';
-                btn.innerHTML = `Bob: ${start+1}-${end} <br><span style="font-size:0.85rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learned}/${end - start} ✅</span>`;
-                btn.onclick = () => { pendingLevelQs = chunkQs; testType = 'chapter'; document.getElementById('modal-chapters').style.display = 'none'; openSetup(); };
+                btn.innerHTML = `Bob: ${start+1}-${end} <span style="font-size:0.8rem; color:${isFull ? 'var(--success)' : 'var(--warning)'}">${learned}/${end - start} ✅</span>`;
+                btn.onclick = () => { pendingLevelQs = chunkQs; testType = 'chapter'; openSetup(); };
                 grid.appendChild(btn);
             }
             document.getElementById('modal-chapters').style.display = 'flex';
         }
 
         function prepareTest(type) {
-            document.getElementById('modal-level').style.display = 'none';
-            if (type === 'errors' && stats.errors.length === 0) return alert("Sizda xatolar yo'q. Barakalla!");
+            forceCloseAllModals();
+            if (type === 'errors' && stats.errors.length === 0) return alert("Xatolar topilmadi!");
             testType = type; openSetup();
         }
-        function openSetup() { document.getElementById('modal-setup').style.display = 'flex'; }
-        function setDifficulty(btn) {
-            document.querySelectorAll('#modal-setup .lvl-btn:nth-child(-n+3)').forEach(b => b.style.opacity = '0.4');
-            btn.style.opacity = '1';
+
+        // ==========================================
+        // 4. SETUP
+        // ==========================================
+        function openSetup() { forceCloseAllModals(); document.getElementById('setup-screen').style.display = 'flex'; }
+        
+        function setDifficulty(level, btn) {
+            document.querySelectorAll('.difficulty-control .seg-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(level === 'easy') diffTime = 1200; if(level === 'medium') diffTime = 900; if(level === 'hard') diffTime = 600; 
+        }
+        function setOrder(mode, btn) {
+            document.querySelectorAll('.order-control .seg-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active'); orderMode = mode;
         }
 
-        // --- 4. Test Logic ---
-        function applySetup(order) {
-            document.getElementById('modal-setup').style.display = 'none'; isExamMode = false;
-            let pool = []; 
-            // Xatoni oldini olish: Baza doim original zapasdan olinadi
+        function applySetup() {
+            forceCloseAllModals(); isExamMode = false; let pool = []; 
             let cleanBank = [...bank].sort((a,b) => a.id - b.id);
 
             if(testType === 'level' || testType === 'chapter') pool = [...pendingLevelQs];
@@ -451,88 +598,153 @@
             else if(testType === 'errors') pool = cleanBank.filter(q => stats.errors.includes(q.id));
             else if(testType === 'sub_mix') pool = cleanBank.filter(q => q.subject === pendingSubject).sort(() => Math.random()-0.5).slice(0, 20);
             
-            if(order === 'rand') pool = pool.sort(() => Math.random() - 0.5);
-            else pool = pool.sort((a,b) => a.id - b.id); // Ketma-ketlik kafolati
+            if(orderMode === 'random') pool = pool.sort(() => Math.random() - 0.5);
+            else pool = pool.sort((a,b) => a.id - b.id);
 
             currentTest = pool; startTestSession();
         }
 
         function startExamMode() {
-            testType = 'exam'; isExamMode = true; let examQs = [];
+            forceCloseAllModals(); testType = 'exam'; isExamMode = true; let examQs = [];
             const subjects = ['musiqa_nazariyasi', 'cholgu_ijrochiligi', 'vokal_ijrochiligi', 'metodika_repertuar'];
             subjects.forEach(sub => { let sQs = bank.filter(q => q.subject === sub).sort(() => Math.random() - 0.5).slice(0, 15); examQs = examQs.concat(sQs); });
-            currentTest = examQs.sort(() => Math.random() - 0.5); startTestSession();
+            currentTest = examQs.sort(() => Math.random() - 0.5); diffTime = 3600; startTestSession();
         }
 
-        // --- 5. Engine & Animations ---
+        // ==========================================
+        // 5. TEST ENGINE (BLUR LIST & SCROLL)
+        // ==========================================
         function startTestSession() {
-            switchScreen('screen-dash', 'screen-test'); currentIdx = 0;
+            switchScreen('dashboard-screen', 'test-screen'); document.getElementById('exit-test-btn').classList.remove('hidden'); document.getElementById('exam-timer').classList.remove('hidden');
+            currentIdx = 0; currentIndex = 0; userAnswers = new Array(currentTest.length).fill(null);
+            
             currentTest = currentTest.map(q => {
                 let shuffledOpts = [...q.originalOpts].sort(() => Math.random() - 0.5);
-                return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(q.correctText), userAns: null };
+                return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(q.correctText) };
             });
-            document.getElementById('dot-track').innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}">${i+1}</div>`).join('');
-            if(isExamMode) { document.getElementById('exam-timer').style.display = 'block'; startTimer(3600); } 
-            else document.getElementById('exam-timer').style.display = 'none';
-            loadQuestion();
+
+            clearInterval(timerInterval); startTimer(diffTime);
+            renderMap(); renderAllQuestions();
         }
 
         function startTimer(seconds) {
-            clearInterval(timerInterval);
+            let time = seconds;
             timerInterval = setInterval(() => {
-                seconds--; let m = Math.floor(seconds/60); let s = seconds % 60;
-                document.getElementById('exam-timer').innerText = `${m}:${s<10?'0':''}${s}`;
-                if(seconds <= 0) { clearInterval(timerInterval); showResult(); }
+                time--; let m = Math.floor(time / 60), s = time % 60;
+                document.getElementById('exam-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if (time <= 0) { clearInterval(timerInterval); showResult(); }
             }, 1000);
         }
 
-        function loadQuestion() {
-            const q = currentTest[currentIdx];
-            document.getElementById('live-counter').innerText = `Savol: ${currentIdx + 1} / ${currentTest.length}`;
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-            const activeDot = document.getElementById(`dot-${currentIdx}`);
-            if(activeDot) { activeDot.classList.add('active'); activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center' }); }
-
-            const spin = document.getElementById('casino-spin'); const qCard = document.getElementById('question-card');
-            qCard.classList.remove('shake');
-            let sc = 0; let si = setInterval(() => {
-                spin.innerText = Math.floor(Math.random() * currentTest.length) + 1;
-                if(++sc > 8) { clearInterval(si); spin.innerText = currentIdx + 1; }
-            }, 40);
-
-            document.getElementById('question-text').innerText = q.q;
-            document.getElementById('options-box').innerHTML = q.options.map((opt, i) => `<button class="opt-btn" onclick="selectAnswer(${i}, this, event)">${opt}</button>`).join('');
+        function renderMap() {
+            document.getElementById('indicator-map').innerHTML = currentTest.map((_, i) => `<div class="dot" id="dot-${i}" onclick="goTo(${i})">${i+1}</div>`).join('');
         }
 
-        function selectAnswer(selectedIdx, btnEl, event) {
-            document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-            const q = currentTest[currentIdx]; const isCorrect = (selectedIdx === q.answer); q.userAns = isCorrect;
-            const dot = document.getElementById(`dot-${currentIdx}`); const qCard = document.getElementById('question-card');
+        function renderAllQuestions() {
+            const area = document.getElementById('all-questions-area');
+            area.innerHTML = currentTest.map((q, idx) => `
+                <div class="q-block ${idx === currentIndex ? 'active-q' : 'blurred-q'}" id="q-block-${idx}">
+                    <div class="q-meta">
+                        <div class="spin-box" id="spin-${idx}">${idx+1}</div>
+                        Savol ${idx+1} / ${currentTest.length}
+                    </div>
+                    <div class="q-text">${q.q}</div>
+                    <div class="options-box" id="opts-${idx}">
+                        ${q.options.map((opt, optIdx) => `
+                            <button class="option-btn" id="btn-${idx}-${optIdx}" onclick="checkAns(${idx}, ${optIdx}, event)" ${userAnswers[idx] ? 'disabled' : ''}>
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            updateMap(); scrollToActive(); runSpin(currentIndex);
+        }
 
-            if(isCorrect) {
-                btnEl.style.background = 'var(--success)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--success)';
-                btnEl.style.boxShadow = '0 0 20px rgba(50, 215, 75, 0.5)';
-                dot.classList.add('correct'); playFeedback('correct');
-                createParticles(event.clientX, event.clientY); // MAGIC PARTICLES
-                if(!stats.learned.includes(q.id)) stats.learned.push(q.id);
-                stats.errors = stats.errors.filter(id => id !== q.id); 
-            } else {
-                btnEl.style.background = 'var(--error)'; btnEl.style.color = '#fff'; btnEl.style.borderColor = 'var(--error)';
-                qCard.classList.add('shake'); dot.classList.add('wrong'); playFeedback('wrong');
-                if(!stats.errors.includes(q.id)) stats.errors.push(q.id);
+        function runSpin(idx) {
+            const spin = document.getElementById(`spin-${idx}`); if(!spin) return;
+            let sc = 0; let si = setInterval(() => { spin.innerText = Math.floor(Math.random() * currentTest.length) + 1; if(++sc > 8) { clearInterval(si); spin.innerText = idx + 1; } }, 40);
+        }
+
+        function updateFocus() {
+            for(let i = 0; i < currentTest.length; i++) {
+                const block = document.getElementById(`q-block-${i}`);
+                if(block) { if(i === currentIndex) { block.classList.remove('blurred-q'); block.classList.add('active-q'); runSpin(i); } else { block.classList.remove('active-q'); block.classList.add('blurred-q'); } }
             }
-            localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
-            setTimeout(() => { if(currentIdx < currentTest.length - 1) { currentIdx++; loadQuestion(); } else showResult(); }, 1000); 
+            scrollToActive(); updateMap();
         }
 
-        function showResult() {
+        function scrollToActive() {
+            const activeBlock = document.getElementById(`q-block-${currentIndex}`);
+            if (activeBlock) activeBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const activeDot = document.getElementById(`dot-${currentIndex}`);
+            if(activeDot) activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        function updateMap() {
+            let answered = userAnswers.filter(a => a !== null).length;
+            document.getElementById('progress-fill').style.width = `${(answered / currentTest.length) * 100}%`;
+            currentTest.forEach((_, i) => {
+                const dot = document.getElementById(`dot-${i}`);
+                if(dot) { dot.className = 'dot'; if (i === currentIndex) dot.classList.add('active-dot'); if (userAnswers[i]) dot.classList.add(userAnswers[i].isCorrect ? 'correct' : 'wrong'); }
+            });
+        }
+
+        function checkAns(qIdx, optIdx, event) {
+            if (qIdx !== currentIndex || userAnswers[qIdx]) return;
+            const isCorrect = optIdx === currentTest[qIdx].answer; userAnswers[qIdx] = { selected: optIdx, isCorrect };
+            const qId = currentTest[qIdx].id; const clickedBtn = document.getElementById(`btn-${qIdx}-${optIdx}`);
+            
+            if (isCorrect) {
+                if (!stats.learned.includes(qId)) stats.learned.push(qId);
+                stats.errors = stats.errors.filter(id => id !== qId); 
+                clickedBtn.classList.add('magic-correct'); playFeedback('correct'); createParticles(event);
+            } else {
+                if (!stats.errors.includes(qId)) stats.errors.push(qId);
+                clickedBtn.classList.add('magic-wrong'); playFeedback('wrong');
+                // DIQQAT: Yashirin javob qoidasi - To'g'ri javob KO'RSATILMAYDI.
+            }
+            
+            localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
+            const options = document.getElementById(`opts-${qIdx}`).getElementsByTagName('button');
+            for(let btn of options) btn.disabled = true;
+
+            if (userAnswers.filter(a => a !== null).length === currentTest.length) document.getElementById('finish-btn').classList.remove('hidden');
+
+            setTimeout(() => { 
+                let next = userAnswers.findIndex(ans => ans === null); 
+                if (next !== -1) { currentIndex = next; updateFocus(); } 
+            }, 800);
+        }
+
+        function move(step) { let n = currentIndex + step; if (n >= 0 && n < currentTest.length) { currentIndex = n; updateFocus(); } }
+        function goTo(i) { currentIndex = i; updateFocus(); }
+
+        // ==========================================
+        // 6. RESULT
+        // ==========================================
+        function finishExam() {
             clearInterval(timerInterval);
-            let correctCount = currentTest.filter(q => q.userAns === true).length;
+            let correctCount = userAnswers.filter(a => a?.isCorrect).length;
+            if(!isExamMode && correctCount < currentTest.length) {
+                // EXAM mode bo'lmasa 100% yechish talab qilinadi
+                alert(`Natija: ${correctCount}/${currentTest.length}. Qoidaga ko'ra, 100% to'g'ri bo'lmaguncha ushbu savollar aralashtirib qayta beriladi.`);
+                currentTest = shuffleArray(currentTest).map(q => {
+                    let correctText = q.options[q.answer]; let shuffledOpts = shuffleArray([...q.options]);
+                    return { ...q, options: shuffledOpts, answer: shuffledOpts.indexOf(correctText) };
+                });
+                userAnswers = new Array(currentTest.length).fill(null); currentIndex = 0; startTimer(diffTime); renderAllQuestions(); document.getElementById('finish-btn').classList.add('hidden');
+            } else {
+                showResult(correctCount);
+            }
+        }
+        function shuffleArray(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+        function showResult(correctCount) {
             let percent = Math.round((correctCount / currentTest.length) * 100);
             document.getElementById('result-percent').innerText = `${percent}%`;
-            
             let msg = "", color = "";
-            if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; }
+            if(percent >= 90) { msg = "Sehrli natija! Imtihonga to'liq tayyorsiz. 🏆"; color = "var(--success)"; confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });}
             else if(percent >= 70) { msg = "Yaxshi natija, lekin biroz mashq qiling. 👍"; color = "var(--primary)"; }
             else if(percent >= 50) { msg = "Ko'rdingizmi? Yana urinib ko'ring! 📚"; color = "var(--warning)"; }
             else { msg = "Ko'proq mashq kerak! Xatolar ustida ishlang. ⚠️"; color = "var(--error)"; }
@@ -541,8 +753,7 @@
             document.getElementById('result-donut').style.borderColor = color;
             document.getElementById('result-donut').style.boxShadow = `0 0 30px ${color}`;
             document.getElementById('result-percent').style.color = color;
-            document.getElementById('result-percent').style.textShadow = `0 0 15px ${color}`;
-            document.getElementById('modal-result').style.display = 'flex';
+            forceCloseAllModals(); document.getElementById('modal-result').style.display = 'flex';
         }
     </script>
 </body>
