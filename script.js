@@ -1,221 +1,236 @@
-/* ============================================================
-   JS: ADHAM'S PRO EXAM v7.0 - CORE ENGINE
-   ============================================================ */
+let bank = []; 
+let currentTest = []; 
+let userAnswers = [];
+let currentIndex = 0;
+let timerInterval;
+let timeRemaining = 900; // 15 daqiqa
 
-const app = {
-    // Ma'lumotlar ombori
-    db: {
-        musiqa_nazariyasi: [],
-        cholgu_ijrochiligi: [],
-        vokal_ijrochiligi: [],
-        metodika_repertuar: []
-    },
-    currentTest: [],
-    currentIndex: 0,
-    correctCount: 0,
-    errorCount: 0,
-    timer: null,
+// LocalStorage'dan ma'lumotlarni xavfsiz o'qish
+let statistics = JSON.parse(localStorage.getItem('adhamStats')) || { learned: [], errors: [] };
 
-    async init() {
-        // Anti-Cheat: O'ng tugma va nusxalashni bloklash
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 'i')) e.preventDefault();
-        });
-
-        // Ma'lumotlarni yuklash
-        const files = Object.keys(this.db);
-        for (const file of files) {
-            try {
-                const response = await fetch(`${file}.json`);
-                const data = await response.json();
-                
-                // Bonus Logic: 3 ta variant bo'lsa 4-sini qo'shish va aralashtirish
-                this.db[file] = data.map(item => {
-                    let opts = [...item.options];
-                    if (opts.length === 3) opts.push("Barcha javoblar to'g'ri");
-                    
-                    const correctText = item.options[item.answer];
-                    opts = opts.sort(() => Math.random() - 0.5); // Variantlarni aralashtirish
-                    
-                    return {
-                        ...item,
-                        options: opts,
-                        answer: opts.indexOf(correctText)
-                    };
-                });
-            } catch (err) {
-                console.error(`${file} yuklanmadi!`, err);
-            }
-        }
-    },
-
-    showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(`scr-${id}`).classList.add('active');
-    },
-
-    // 200 tadan 20 tani random tanlash (Har gal har xil)
-    startSubject(key) {
-        const pool = [...this.db[key]].sort(() => Math.random() - 0.5).slice(0, 20);
-        this.setupTest(pool, 15); // 15 minut
-    },
-
-    // Imtihon Mode: Har bir fandan 15 tadan (Jami 60 ta)
-    startExam() {
-        let pool = [];
-        Object.keys(this.db).forEach(k => {
-            const subPool = [...this.db[k]].sort(() => Math.random() - 0.5).slice(0, 15);
-            pool.push(...subPool);
-        });
-        this.setupTest(pool.sort(() => Math.random() - 0.5), 60); // 60 minut
-    },
-
-    setupTest(questions, minutes) {
-        this.currentTest = questions;
-        this.currentIndex = 0;
-        this.correctCount = 0;
-        this.errorCount = 0;
-        
-        this.buildIndicators();
-        this.renderQuestion();
-        this.startTimer(minutes);
-        this.showScreen('test');
-    },
-
-    buildIndicators() {
-        const container = document.getElementById('ind-box');
-        container.innerHTML = '';
-        this.currentTest.forEach((_, i) => {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.id = `dot-${i}`;
-            dot.innerText = i + 1;
-            container.appendChild(dot);
-        });
-    },
-
-    renderQuestion() {
-        const q = this.currentTest[this.currentIndex];
-        const qCard = document.querySelector('.q-card');
-        qCard.classList.remove('shake'); // Shake reset
-
-        // Question Spin Effect
-        const spinNum = document.getElementById('q-num-spin');
-        let counter = 0;
-        const interval = setInterval(() => {
-            spinNum.innerText = Math.floor(Math.random() * 99);
-            if (++counter > 8) {
-                clearInterval(interval);
-                spinNum.innerText = this.currentIndex + 1;
-            }
-        }, 40);
-
-        document.getElementById('q-txt').innerText = q.q;
-        const optBox = document.getElementById('opt-box');
-        optBox.innerHTML = '';
-        optBox.dataset.locked = "false";
-
-        q.options.forEach((opt, i) => {
-            const div = document.createElement('div');
-            div.className = 'opt glass';
-            div.innerHTML = `
-                <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;border:1px solid rgba(255,255,255,0.2)">${String.fromCharCode(65+i)}</div>
-                <span>${opt}</span>
-            `;
-            div.onclick = () => this.checkAnswer(i, div);
-            optBox.appendChild(div);
-        });
-
-        // Update indicators
-        document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-        const activeDot = document.getElementById(`dot-${this.currentIndex}`);
-        activeDot.classList.add('active');
-        activeDot.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    },
-
-    checkAnswer(idx, el) {
-        const box = document.getElementById('opt-box');
-        if (box.dataset.locked === "true") return;
-        box.dataset.locked = "true";
-
-        const q = this.currentTest[this.currentIndex];
-        const dot = document.getElementById(`dot-${this.currentIndex}`);
-        const qCard = document.querySelector('.q-card');
-
-        if (idx === q.answer) {
-            el.classList.add('selected-correct');
-            dot.classList.add('correct');
-            this.correctCount++;
-            if (navigator.vibrate) navigator.vibrate(50);
-        } else {
-            el.classList.add('selected-wrong');
-            dot.classList.add('wrong');
-            qCard.classList.add('shake'); // Xato bo'lsa titrash
-            this.errorCount++;
-            // To'g'ri javobni ham ko'rsatish
-            box.children[q.answer].classList.add('selected-correct');
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-        }
-
-        // 1 soniyadan keyin keyingi savolga o'tish
-        setTimeout(() => {
-            if (++this.currentIndex < this.currentTest.length) {
-                this.renderQuestion();
-            } else {
-                this.finishTest();
-            }
-        }, 1000);
-    },
-
-    startTimer(m) {
-        clearInterval(this.timer);
-        let time = m * 60;
-        const display = document.getElementById('timer');
-        this.timer = setInterval(() => {
-            let mins = Math.floor(time / 60);
-            let secs = time % 60;
-            display.innerText = `${mins}:${secs < 10 ? '0' + secs : secs}`;
-            if (--time < 0) {
-                clearInterval(this.timer);
-                this.finishTest();
-            }
-        }, 1000);
-    },
-
-    finishTest() {
-        clearInterval(this.timer);
-        const percent = Math.round((this.correctCount / this.currentTest.length) * 100);
-        
-        document.getElementById('res-pct').innerText = percent + "%";
-        document.getElementById('res-cnt').innerText = `${this.correctCount} / ${this.currentTest.length}`;
-        
-        let msg = "";
-        if (percent >= 90) msg = "Daxshat! Siz haqiqiy profisiz! 🔥";
-        else if (percent >= 70) msg = "Barakalla! Natijangiz juda yaxshi 👍";
-        else msg = "Ko'rdingizmi, siz hali yana mashq qilishingiz kerak 📚";
-        
-        document.getElementById('res-msg').innerText = msg;
-        
-        // Modalni ko'rsatish (Bu qismni keyingi HTML yuborganimda IDlar bilan moslaymiz)
-        this.showResultModal();
-    },
-
-    showResultModal() {
-        // Result ekranini chiqarish
-        const modal = document.getElementById('scr-result') || document.getElementById('modal-res');
-        if(modal) {
-             modal.style.display = 'flex';
-             modal.classList.add('active');
-        }
-    },
-
-    exit() {
-        if (confirm("Testni to'xtatib, chiqib ketishni xohlaysizmi?")) {
-            location.reload();
-        }
+// 1. Dastlabki yuklanish (JSON fayllarni ulaymiz)
+window.onload = async () => {
+    // Agar oldin Dark Mode tanlangan bo'lsa, uni yoqamiz
+    if(localStorage.getItem('theme') === 'true') {
+        document.getElementById('main-body').classList.add('dark-mode');
     }
+
+    const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
+    
+    try {
+        for(let f of files) {
+            let res = await fetch(f);
+            if (res.ok) {
+                let data = await res.json();
+                bank = bank.concat(data.map((q, i) => ({...q, id: f + '_' + i}))); // Noyob ID
+            }
+        }
+    } catch (e) {
+        console.error("Fayllarni yuklashda xatolik! Tizimni Localhost (Live Server) orqali oching.", e);
+    }
+    
+    updateDashboardStats();
 };
 
-// Start initialization
-app.init();
+// 2. Navigatsiya
+function enterDashboard() {
+    document.getElementById('welcome-screen').classList.add('hidden');
+    document.getElementById('dashboard-screen').classList.remove('hidden');
+}
+
+function toggleTheme() {
+    const isDark = document.getElementById('main-body').classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark);
+}
+
+// 3. Anti-Cheat (Aldashning oldini olish)
+document.addEventListener("visibilitychange", () => {
+    const isTestActive = !document.getElementById('test-screen').classList.contains('hidden');
+    if (document.hidden && isTestActive) {
+        alert("DIQQAT! Boshqa oynaga o'tish qat'iyan taqiqlanadi. Test jarayoni nazorat ostida!");
+    }
+});
+
+// 4. Testni shakllantirish (Smart Random)
+function startTest(subject) {
+    let pool = [];
+
+    if (subject === 'all') {
+        pool = bank;
+    } else if (subject === 'errors') {
+        pool = bank.filter(q => statistics.errors.includes(q.id));
+    } else {
+        pool = bank.filter(q => q.id.includes(subject));
+    }
+
+    if (pool.length === 0) {
+        alert("Bu bo'limda hozircha savollar yo'q yoki barcha xatolar to'g'rilangan!");
+        return;
+    }
+
+    // O'rganilmagan savollarni ajratib olish
+    let available = pool.filter(q => !statistics.learned.includes(q.id));
+    
+    // Agar o'rganilmaganlar 20 tadan kam bo'lsa, umumiy bazadan qo'shamiz
+    if(available.length < 20) available = pool;
+
+    // Savollarni aralashtirib, maksimal 20 tasini olish
+    let selected = available.sort(() => 0.5 - Math.random()).slice(0, 20);
+    
+    // Variantlarni aralashtirish (javob to'g'ri joylashishi uchun mantiq)
+    currentTest = selected.map(q => {
+        let correctStr = q.options[q.answer]; // To'g'ri matnni eslab qolamiz
+        let shuffled = [...q.options].sort(() => 0.5 - Math.random());
+        return {...q, options: shuffled, answer: shuffled.indexOf(correctStr)};
+    });
+
+    setupExam();
+}
+
+function setupExam() {
+    document.getElementById('dashboard-screen').classList.add('hidden');
+    document.getElementById('test-screen').classList.remove('hidden');
+    document.getElementById('exam-timer').classList.remove('hidden');
+    
+    userAnswers = new Array(currentTest.length).fill(null);
+    currentIndex = 0;
+    timeRemaining = 900;
+    
+    startTimer();
+    renderQuestion();
+}
+
+// 5. Taymer tizimi
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        let m = Math.floor(timeRemaining / 60);
+        let s = timeRemaining % 60;
+        document.getElementById('exam-timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        
+        if(timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            finishExam();
+        }
+    }, 1000);
+}
+
+// 6. Savolni ekranga chiqarish
+function renderQuestion() {
+    const q = currentTest[currentIndex];
+    const box = document.getElementById('question-box');
+    
+    box.innerHTML = `
+        <h2 style="margin-top:0; font-size: 20px; line-height: 1.4;">
+            ${currentIndex + 1}. ${q.q}
+        </h2>
+        <div class="options-list">
+            ${q.options.map((opt, i) => `
+                <button class="option-btn ${getBtnClass(i)}" onclick="selectAnswer(${i})" ${userAnswers[currentIndex] ? 'disabled' : ''}>
+                    ${String.fromCharCode(65 + i)}) ${opt}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    updateUI();
+}
+
+// 7. Javobni tanlash logikasi
+function selectAnswer(idx) {
+    if(userAnswers[currentIndex]) return; // Ikki marta bosishni oldini olamiz
+
+    const correctIdx = currentTest[currentIndex].answer;
+    const isCorrect = idx === correctIdx;
+    const currentQId = currentTest[currentIndex].id;
+    
+    userAnswers[currentIndex] = { selected: idx, isCorrect };
+
+    // Statistikani yangilash
+    if(isCorrect) {
+        if(!statistics.learned.includes(currentQId)) statistics.learned.push(currentQId);
+        statistics.errors = statistics.errors.filter(id => id !== currentQId); // Xatolardan olib tashlash
+    } else {
+        if(!statistics.errors.includes(currentQId)) statistics.errors.push(currentQId); // Xatolarga qo'shish
+    }
+    
+    localStorage.setItem('adhamStats', JSON.stringify(statistics));
+    
+    renderQuestion(); // Tanlangan variant ranglarini ko'rsatish
+    
+    // Keyingi savolga avtomatik o'tish
+    setTimeout(() => move(1), 700);
+}
+
+// 8. Savollar bo'ylab harakatlanish
+function move(step) {
+    let next = currentIndex + step;
+    if(next >= 0 && next < currentTest.length) {
+        currentIndex = next;
+        renderQuestion();
+    }
+}
+
+// 9. UI va Xaritani yangilash
+function updateUI() {
+    let answeredCount = userAnswers.filter(a => a !== null).length;
+    let progress = (answeredCount / currentTest.length) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+    
+    const map = document.getElementById('map');
+    map.innerHTML = currentTest.map((_, i) => {
+        let cls = i === currentIndex ? 'current' : '';
+        if(userAnswers[i]) {
+            cls = userAnswers[i].isCorrect ? 'correct' : 'wrong';
+        }
+        return `<div class="dot ${cls}" onclick="jumpTo(${i})">${i + 1}</div>`;
+    }).join('');
+
+    document.getElementById('score-correct').innerText = userAnswers.filter(a => a?.isCorrect).length;
+    document.getElementById('score-wrong').innerText = userAnswers.filter(a => a && !a.isCorrect).length;
+
+    if(answeredCount === currentTest.length) {
+        document.getElementById('finish-trigger').classList.remove('hidden');
+    }
+}
+
+function jumpTo(i) {
+    currentIndex = i;
+    renderQuestion();
+}
+
+// 10. Tugmalarning joriy holatiga qarab CSS class berish
+function getBtnClass(i) {
+    if(!userAnswers[currentIndex]) return ''; // Hech narsa tanlanmagan
+    
+    const correctIdx = currentTest[currentIndex].answer;
+    const selectedIdx = userAnswers[currentIndex].selected;
+
+    if (i === correctIdx) return 'correct-ans'; // Har doim to'g'ri javobni yashil qilib ko'rsatamiz
+    if (i === selectedIdx && !userAnswers[currentIndex].isCorrect) return 'wrong-ans'; // Agar xato tanlangan bo'lsa qizil
+    
+    return '';
+}
+
+// 11. Imtihonni yakunlash
+function finishExam() {
+    clearInterval(timerInterval);
+    let correct = userAnswers.filter(a => a?.isCorrect).length;
+    let total = currentTest.length;
+    
+    let percent = Math.round((correct / total) * 100);
+    let msg = percent >= 80 ? "Tabriklaymiz, a'lo natija!" : "Yana tayyorlanishingiz kerak.";
+    
+    alert(`Imtihon yakunlandi!\n\nNatijangiz: ${correct}/${total} (${percent}%)\n${msg}`);
+    location.reload(); // Dasturni boshlang'ich holatga qaytarish
+}
+
+// 12. Asosiy menudagi statistikalarni yangilash
+function updateDashboardStats() {
+    document.getElementById('total-learned').innerText = statistics.learned.length;
+    document.getElementById('total-errors').innerText = statistics.errors.length;
+    
+    let errBtn = document.getElementById('error-work-btn');
+    errBtn.innerHTML = `❌ Xatolar ustida ishlash (${statistics.errors.length})`;
+    errBtn.disabled = statistics.errors.length === 0;
+}
