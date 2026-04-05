@@ -1,4 +1,151 @@
 // ==========================================
+// GOOGLE SHEETS & PWA CONFIGURATION
+// ==========================================
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzC4-Axk2bQsnHJYxMhzn0fblk48j2fWAheHhCxJF5as8fH-NKlIgV0-C7uO6mQfHAM/exec";
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW xatolik: ', err));
+  });
+}
+
+function getOrCreateDeviceId() {
+    let deviceId = localStorage.getItem('adham_pro_device_id');
+    if (!deviceId) {
+        deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        localStorage.setItem('adham_pro_device_id', deviceId);
+    }
+    return deviceId;
+}
+
+// ==========================================
+// XAVFSIZLIK: ANTI-CHEAT VA KLAVIATURA HIMOYASI
+// ==========================================
+
+// Karta raqamini nusxalash (Tap to Copy)
+function copyCard() {
+    const cardText = document.getElementById("card-num").innerText;
+    navigator.clipboard.writeText(cardText).then(() => {
+        alert("💳 Karta raqami nusxalandi: " + cardText + "\nEndi ilovangizga o'tib to'lovni amalga oshirishingiz mumkin.");
+    }).catch(err => {
+        console.error("Nusxalashda xatolik yuz berdi", err);
+    });
+}
+
+// 1. O'ng tugmani bloklash (Body oncontextmenu ga qo'shimcha)
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 2. Tugmalarni bloklash (F12, Ctrl+Shift+I, Ctrl+C, Ctrl+U)
+document.addEventListener('keydown', function(e) {
+    if(e.keyCode === 123) { // F12 blok
+        e.preventDefault(); return false;
+    }
+    if(e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) { // Ctrl+Shift+I / J blok
+        e.preventDefault(); return false;
+    }
+    if(e.ctrlKey && e.keyCode === 85) { // Ctrl+U (Source code) blok
+        e.preventDefault(); return false;
+    }
+    if(e.ctrlKey && e.keyCode === 67) { // Ctrl+C (Copy) blok
+        e.preventDefault(); 
+        alert("⚠️ Tizimda ko'chirish (nusxalash) qat'iyan taqiqlangan!");
+        return false;
+    }
+});
+
+// 3. Oynadan chiqib ketishni nazorat qilish (Tab-switch Anti-cheat)
+let cheatWarnings = 0;
+document.addEventListener("visibilitychange", () => {
+    const testScreen = document.getElementById("test-screen");
+    // Faqat test yechayotgan vaqtda boshqa oynaga o'tsa ushlaymiz
+    if (testScreen && !testScreen.classList.contains("hidden") && document.hidden) {
+        cheatWarnings++;
+        if (cheatWarnings >= 3) {
+            alert("❌ DIQQAT! Siz 3 marta boshqa oynaga o'tdingiz. Qoidabuzarlik sababli test avtomatik yakunlanmoqda!");
+            finishExam(); // Testni majburiy yopish
+        } else {
+            alert(`⚠️ OGOHLANTIRISH (${cheatWarnings}/3)!\n\nSiz boshqa oynaga o'tdingiz (Ko'chirmakashlikka urinish).\nAgar bu holat 3 marta takrorlansa, test avtomatik yopiladi!`);
+        }
+    }
+});
+
+
+// ==========================================
+// YASHIRIN AYG'OQCHI (ADMIN BLOKINI TEKSHIRISH)
+// ==========================================
+async function checkAdminBlock() {
+    const savedName = localStorage.getItem('pro_exam_name') || '';
+    if (!savedName) return; 
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "check_block", login: savedName })
+        });
+        const result = await response.json();
+        if (result.blocked) {
+            alert("DIQQAT: Tizim ma'muriyati (Admin) tomonidan sizning akkauntingiz bloklangan!");
+            localStorage.removeItem('pro_exam_auth');
+            localStorage.removeItem('pro_exam_name');
+            location.reload(); 
+        }
+    } catch (e) {
+        console.log("Offline rejim yoki tarmoqda xatolik.");
+    }
+}
+
+// ==========================================
+// AUTHENTICATION LOGIC
+// ==========================================
+async function authenticateUser() {
+    const loginVal = document.getElementById('auth-login').value.trim();
+    const passVal = document.getElementById('auth-password').value.trim();
+    const keygenVal = document.getElementById('auth-keygen').value.trim();
+    const errorEl = document.getElementById('auth-error');
+    const btn = document.getElementById('btn-auth');
+
+    if(!loginVal || !passVal) {
+        errorEl.innerText = "Login va Parol majburiy!";
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    btn.innerText = "Tekshirilmoqda...";
+    btn.disabled = true;
+    errorEl.classList.add('hidden');
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                login: loginVal,
+                password: passVal,
+                keygen: keygenVal,
+                deviceId: getOrCreateDeviceId()
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            localStorage.setItem('pro_exam_auth', 'true');
+            localStorage.setItem('pro_exam_name', result.name || loginVal);
+            document.getElementById('student-name').value = result.name || loginVal;
+            switchScreen('auth-screen', 'welcome-screen');
+        } else {
+            errorEl.innerText = result.message;
+            errorEl.classList.remove('hidden');
+        }
+    } catch (e) {
+        errorEl.innerText = "Tarmoqda xatolik yuz berdi. Internetni tekshiring.";
+        errorEl.classList.remove('hidden');
+    } finally {
+        btn.innerText = "Kirish 🔒";
+        btn.disabled = false;
+    }
+}
+
+// ==========================================
 // AUDIO, VIBRATION & PARTICLES (MAGIC TRICKS)
 // ==========================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -36,17 +183,12 @@ function createParticles(event) {
     }
 }
 
-// ==========================================
-// GHOSTBUSTER (Tozalash)
-// ==========================================
-function forceCloseAllModals() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-}
+function forceCloseAllModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 function closeModal(e, id) { if(e.target.id === id) document.getElementById(id).style.display = 'none'; }
 function closeModalDirect(id) { document.getElementById(id).style.display = 'none'; }
 
 // ==========================================
-// GLOBAL VARIABLES
+// GLOBAL VARIABLES & WINDOW ONLOAD
 // ==========================================
 let bank = []; let currentTest = []; let userAnswers = []; let currentIndex = 0;
 let currentUser = null; let timerInterval;
@@ -54,9 +196,6 @@ let stats = JSON.parse(localStorage.getItem('adham_pro_stats')) || { learned: []
 let pendingSubject = null; let pendingLevelQs = []; let testType = null;
 let diffTime = 900; let orderMode = 'random'; let isExamMode = false;
 
-// ==========================================
-// 1. DATA YUKLASH
-// ==========================================
 async function loadData() {
     const files = ['musiqa_nazariyasi.json', 'cholgu_ijrochiligi.json', 'vokal_ijrochiligi.json', 'metodika_repertuar.json'];
     let globalId = 1;
@@ -77,14 +216,24 @@ async function loadData() {
     document.getElementById('max-learned-total').innerText = `/ ${bank.length}`;
     updateDashboardStats();
 }
+
 window.onload = () => {
     loadData();
+    
+    // AVTOMATIK KIRISH
+    const isAuth = localStorage.getItem('pro_exam_auth');
+    if (isAuth === 'true') {
+        const savedName = localStorage.getItem('pro_exam_name') || '';
+        document.getElementById('student-name').value = savedName;
+        switchScreen('auth-screen', 'welcome-screen');
+        
+        // FONDAGI TEKSHIRUV ISHGA TUSHADI
+        checkAdminBlock();
+    }
+
     if (localStorage.getItem('theme') === 'dark') document.body.classList.replace('light-mode', 'dark-mode');
 };
 
-// ==========================================
-// 2. EKRANLAR VA MENYU BOSHQRUVI
-// ==========================================
 function toggleTheme() { 
     let isDark = document.body.classList.contains('dark-mode');
     if(isDark) { document.body.classList.replace('dark-mode', 'light-mode'); localStorage.setItem('theme', 'light'); }
@@ -111,11 +260,17 @@ function goHome() {
     clearInterval(timerInterval); forceCloseAllModals();
     document.getElementById('exit-test-btn').classList.add('hidden');
     document.getElementById('exam-timer').classList.add('hidden');
+    cheatWarnings = 0; // Uyga qaytganda ogohlantirishlarni nolga tushirish
     switchScreen('test-screen', 'dashboard-screen'); 
     updateDashboardStats(); 
 }
 function confirmExit() { if(confirm("Testdan chiqishni xohlaysizmi?")) goHome(); }
-function logout() { if(confirm("Tizimdan chiqishni xohlaysizmi?")) location.reload(); }
+function logout() { 
+    if(confirm("Tizimdan to'liq chiqishni xohlaysizmi?")) {
+        localStorage.removeItem('pro_exam_auth');
+        location.reload(); 
+    }
+}
 
 function updateDashboardStats() {
     stats.learned = [...new Set(stats.learned)]; stats.errors = [...new Set(stats.errors)];
@@ -125,9 +280,6 @@ function updateDashboardStats() {
     document.getElementById('error-work-btn').disabled = stats.errors.length === 0;
 }
 
-// ==========================================
-// 3. LEVEL & CHAPTERS (MODALS)
-// ==========================================
 function openLevels(sub, title) {
     forceCloseAllModals(); pendingSubject = sub; document.getElementById('modal-subject-title').innerText = title;
     const grid = document.getElementById('level-grid-box'); grid.innerHTML = '';
@@ -168,9 +320,6 @@ function prepareTest(type) {
     testType = type; openSetup();
 }
 
-// ==========================================
-// 4. SETUP
-// ==========================================
 function openSetup() { forceCloseAllModals(); document.getElementById('setup-screen').style.display = 'flex'; }
 
 function setDifficulty(level, btn) {
@@ -184,7 +333,7 @@ function setOrder(mode, btn) {
 }
 
 function applySetup() {
-    forceCloseAllModals(); isExamMode = false; let pool = []; 
+    forceCloseAllModals(); isExamMode = false; let pool = []; cheatWarnings = 0;
     let cleanBank = [...bank].sort((a,b) => a.id - b.id);
 
     if(testType === 'level' || testType === 'chapter') pool = [...pendingLevelQs];
@@ -199,15 +348,12 @@ function applySetup() {
 }
 
 function startExamMode() {
-    forceCloseAllModals(); testType = 'exam'; isExamMode = true; let examQs = [];
+    forceCloseAllModals(); testType = 'exam'; isExamMode = true; cheatWarnings = 0; let examQs = [];
     const subjects = ['musiqa_nazariyasi', 'cholgu_ijrochiligi', 'vokal_ijrochiligi', 'metodika_repertuar'];
     subjects.forEach(sub => { let sQs = bank.filter(q => q.subject === sub).sort(() => Math.random() - 0.5).slice(0, 15); examQs = examQs.concat(sQs); });
     currentTest = examQs.sort(() => Math.random() - 0.5); diffTime = 3600; startTestSession();
 }
 
-// ==========================================
-// 5. TEST ENGINE (BLUR LIST & SCROLL)
-// ==========================================
 function startTestSession() {
     switchScreen('dashboard-screen', 'test-screen'); document.getElementById('exit-test-btn').classList.remove('hidden'); document.getElementById('exam-timer').classList.remove('hidden');
     currentIdx = 0; currentIndex = 0; userAnswers = new Array(currentTest.length).fill(null);
@@ -296,7 +442,6 @@ function checkAns(qIdx, optIdx, event) {
     } else {
         if (!stats.errors.includes(qId)) stats.errors.push(qId);
         clickedBtn.classList.add('magic-wrong'); playFeedback('wrong');
-        // DIQQAT: Yashirin javob qoidasi - To'g'ri javob KO'RSATILMAYDI.
     }
     
     localStorage.setItem('adham_pro_stats', JSON.stringify(stats));
@@ -314,14 +459,10 @@ function checkAns(qIdx, optIdx, event) {
 function move(step) { let n = currentIndex + step; if (n >= 0 && n < currentTest.length) { currentIndex = n; updateFocus(); } }
 function goTo(i) { currentIndex = i; updateFocus(); }
 
-// ==========================================
-// 6. RESULT
-// ==========================================
 function finishExam() {
     clearInterval(timerInterval);
     let correctCount = userAnswers.filter(a => a?.isCorrect).length;
     if(!isExamMode && correctCount < currentTest.length) {
-        // EXAM mode bo'lmasa 100% yechish talab qilinadi
         alert(`Natija: ${correctCount}/${currentTest.length}. Qoidaga ko'ra, 100% to'g'ri bo'lmaguncha ushbu savollar aralashtirib qayta beriladi.`);
         currentTest = shuffleArray(currentTest).map(q => {
             let correctText = q.options[q.answer]; let shuffledOpts = shuffleArray([...q.options]);
