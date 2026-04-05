@@ -2,7 +2,6 @@
    Tizim Ranglari (Eye-Comfort 50% qo'llanilgan)
    ========================================= */
 :root {
-    /* Kungi rejim (Warm Eye Comfort - Asosiy) */
     --primary: #007AFF; 
     --accent: #5E5CE6; 
     --success: #34C759; 
@@ -19,7 +18,6 @@
 }
 
 body.dark-mode {
-    /* Tungi rejim (Ko'kish-qora yumshoq ranglar) */
     --bg: #121418;
     --card: #1A1D24;
     --text: #E2E8F0;
@@ -29,28 +27,16 @@ body.dark-mode {
     --magic-glow: 0 0 25px rgba(10, 132, 255, 0.6);
 }
 
-* { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-    margin: 0; 
-    padding: 0; 
-    outline: none; 
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; outline: none; }
 
 body { 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
     background-color: var(--bg);
-    background-image: var(--bg-overlay), url('bino.png'); /* Orqa fon rasm bilan */
-    background-size: cover; 
-    background-position: center; 
-    background-attachment: fixed;
+    background-image: var(--bg-overlay), url('bino.png');
+    background-size: cover; background-position: center; background-attachment: fixed;
     color: var(--text); 
     transition: background-color 0.4s, color 0.4s; 
-    overflow-x: hidden; 
-    user-select: none; 
-    display: flex; 
-    flex-direction: column; 
-    min-height: 100vh; 
+    overflow-x: hidden; user-select: none; display: flex; flex-direction: column; min-height: 100vh; 
 }
 
 .hidden { display: none !important; }
@@ -64,7 +50,6 @@ body {
 .text-error { color: var(--error); }
 .max-total { font-size: 0.85rem; color: var(--text-sec); font-weight: normal; }
 
-/* Adham's Copyright Footer */
 .app-footer { text-align: center; padding: 15px; font-size: 0.85rem; color: var(--text-sec); font-weight: 500; margin-top: auto; letter-spacing: 0.5px; }
 .app-footer-welcome { position: absolute; bottom: 15px; width: 100%; text-align: center; font-size: 0.85rem; color: rgba(113, 128, 150, 0.8); font-weight: 500; z-index: 10; }
 body.dark-mode .app-footer-welcome { color: rgba(255,255,255,0.7); }
@@ -78,10 +63,8 @@ body.dark-mode .glass-effect { background: rgba(26, 29, 36, 0.7); border: 1px so
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; filter: blur(5px); } to { transform: translateY(0); opacity: 1; filter: blur(0); } }
 .pulse { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(0, 122, 255, 0); } 100% { box-shadow: 0 0 0 0; } }
-.gravity-fall { animation: fallDown 1.5s forwards ease-in; pointer-events: none; }
-@keyframes fallDown { to { transform: translateY(100vh) rotate(15deg); opacity: 0; } }
 
-/* 🌟 MAGIC STYLE ANIMATIONS 🌟 */
+/* MAGIC STYLE ANIMATIONS */
 @keyframes magicCorrect {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.8); }
     50% { transform: scale(1.03); box-shadow: 0 0 25px 5px rgba(52, 199, 89, 0.3); }
@@ -94,15 +77,13 @@ body.dark-mode .glass-effect { background: rgba(26, 29, 36, 0.7); border: 1px so
 }
 .magic-correct { animation: magicCorrect 0.6s ease-out forwards; background: rgba(52, 199, 89, 0.15) !important; border-color: var(--success) !important; color: var(--success) !important; }
 .magic-wrong { animation: magicWrong 0.5s ease-out forwards; background: rgba(255, 59, 48, 0.15) !important; border-color: var(--error) !important; color: var(--error) !important; text-decoration: line-through; opacity: 0.8; }
-
-/* Magic Particles */
 .magic-particle { position: fixed; width: 8px; height: 8px; background: var(--success); border-radius: 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 12px var(--success); }
 
 /* Welcome Screen */
 .hero-overlay { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative; }
-.hero-card { width: 100%; max-width: 550px; text-align: center; padding: 40px 25px; border-radius: 35px; z-index: 2; margin-bottom: 30px; }
+.hero-card { width: 100%; max-width: 550px; text-align: center; padding: 40px 25px; border-radius: 35px; z-index: 2; margin-bottom: 30px; max-height: 90vh; overflow-y: auto; }
+.hero-card::-webkit-scrollbar { display: none; } /* Scrollni yashirish */
 
-/* Dumaloq Logo */
 .main-logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 2px solid var(--primary); cursor: pointer; animation: pulseGlow 2s infinite alternate; }
 @keyframes pulseGlow { from { box-shadow: 0 0 10px rgba(0, 122, 255, 0.3); } to { box-shadow: var(--magic-glow); border-color: var(--accent); } }
 
@@ -111,6 +92,16 @@ body.dark-mode .glass-effect { background: rgba(26, 29, 36, 0.7); border: 1px so
 .hero-subtitle { font-size: 1rem; opacity: 0.9; margin-bottom: 25px; line-height: 1.5; }
 .rules-box { background: rgba(0,0,0,0.05); padding: 15px; border-radius: 15px; text-align: left; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.6; border: 1px solid var(--glass-border); }
 body.dark-mode .rules-box { background: rgba(255,255,255,0.05); }
+
+/* Payment & Security Box Additions */
+.payment-box { margin-top: 15px; padding: 20px; background: rgba(0, 122, 255, 0.05); border: 1px solid rgba(0, 122, 255, 0.2); }
+body.dark-mode .payment-box { background: rgba(0, 122, 255, 0.08); }
+.card-copy { background: var(--card); padding: 14px; border-radius: 16px; text-align: center; font-size: 1.15rem; font-family: monospace; cursor: pointer; border: 1px dashed var(--primary); transition: 0.2s; color: var(--text); margin-top: 10px; }
+.card-copy:active { transform: scale(0.95); background: var(--success); color: white; border-color: var(--success); }
+.tg-link { display: inline-flex; align-items: center; justify-content: center; background: var(--card); border-radius: 50%; width: 45px; height: 45px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; border: 1px solid var(--glass-border); }
+.tg-link img { width: 22px; height: 22px; }
+.tg-link:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,122,255,0.3); }
+
 .premium-input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 15px; font-size: 1.05rem; text-align: center; background: var(--card); color: var(--text); font-weight: 600; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
 .premium-input:focus { box-shadow: 0 0 0 3px rgba(0,122,255,0.3); }
 .btn-start { width: 100%; padding: 18px; border-radius: 18px; background: var(--primary); color: white; border: none; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; margin-bottom: 15px; }
@@ -207,7 +198,6 @@ body.dark-mode .q-list-wrapper::-webkit-scrollbar-thumb { background: rgba(255,2
 .q-block.blurred-q { opacity: 0.4; filter: blur(3.5px); transform: scale(0.96); pointer-events: none; }
 .q-block.active-q { opacity: 1; filter: blur(0); transform: scale(1); pointer-events: auto; border-color: rgba(0, 122, 255, 0.2); box-shadow: 0 12px 35px rgba(0, 122, 255, 0.08); }
 
-/* Casino Spin Indicator in Block */
 .spin-box { font-size: 1.1rem; color: var(--primary); font-weight: 900; margin-bottom: 10px; display: inline-block;}
 .q-meta { color: var(--text-sec); font-weight: 700; font-size: 0.85rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
 
@@ -221,7 +211,7 @@ body.dark-mode .q-list-wrapper::-webkit-scrollbar-thumb { background: rgba(255,2
 .nav-btn:active { transform: scale(0.96); }
 .finish-btn { flex: 2; background: var(--success); color: white; border: none; font-weight: bold; border-radius: 16px; font-size: 1rem; cursor: pointer;}
 
-/* Modals (Levels / Chapters / Results) */
+/* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
 .modal-content { width: 100%; max-width: 450px; padding: 25px; border-radius: 35px; max-height: 85vh; overflow-y: auto; background: var(--card); border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.2);}
 .modal-content::-webkit-scrollbar { display: none; }
@@ -245,7 +235,6 @@ body.dark-mode .q-list-wrapper::-webkit-scrollbar-thumb { background: rgba(255,2
     .q-list-wrapper { height: auto; flex: 1; padding-right: 20px; }
     .q-block { padding: 35px 30px; }
 }
-
 @media (min-width: 1024px) {
     .category-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
     .btn-special, .btn-outline, .btn-error, .btn-exam { grid-column: span 1; }
