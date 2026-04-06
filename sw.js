@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pro-exam-v7.5-cache';
+const CACHE_NAME = 'pro-exam-v8.0-cache';
 
 // Sayt ochilishi uchun kerak bo'lgan barcha fayllar ro'yxati
 const urlsToCache = [
@@ -16,18 +16,18 @@ const urlsToCache = [
   '/metodika_repertuar.json'
 ];
 
-// O'rnatish jarayonida fayllarni keshga yuklash
+// 1. O'rnatish jarayonida fayllarni keshga yuklash
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Kesh xotira muvaffaqiyatli ochildi');
+        console.log('Kesh xotira muvaffaqiyatli ochildi (PRO EXAM v8.0)');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// So'rovlarni (fetch) tutib olish va keshdan qaytarish
+// 2. So'rovlarni (fetch) tutib olish va keshdan tezkor qaytarish
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -38,7 +38,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Eski keshlarni tozalash (yangi versiya chiqqanda)
+// 3. Eski keshlarni tozalash (Yangi versiya chiqqanda xotirani to'ldirmaslik uchun)
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
