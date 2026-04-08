@@ -3,81 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO EXAM - Yangi manzilga yo'naltirish</title>
-    
-    <meta http-equiv="refresh" content="0; url=https://adhammuttestproextrain.netlify.app/">
-    
+    <title>PRO EXAM - Asosiy Kirish</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #F4F5F0;
-            color: #2C3E50;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            /* Orqa fon rasmini shu yerda ulanadi. Fayl nomini o'zingizdagi rasm formatiga (png/jpg) moslang */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('bino.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .gateway-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 50px 40px;
+            border-radius: 30px;
+            max-width: 800px;
             text-align: center;
-            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-out forwards;
         }
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 35px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.07);
-            max-width: 420px;
-            width: 90%;
-            border: 1px solid rgba(0,0,0,0.03);
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        h2 { color: #007AFF; margin-bottom: 10px; font-weight: 800; }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007AFF;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            animation: spin 1s linear infinite;
-            margin: 25px auto;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        p { line-height: 1.5; margin: 10px 0; }
-        .btn-manual {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 24px;
-            background-color: #007AFF;
-            color: white;
+
+        p.welcome-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            color: #e0e0e0;
+            font-weight: 400;
+        }
+
+        .buttons-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-decoration: none;
-            border-radius: 15px;
-            font-weight: 700;
-            transition: 0.2s;
+            padding: 20px 30px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid transparent;
         }
-        .btn-manual:active { transform: scale(0.95); }
+
+        .btn-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .btn-subtitle {
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* 1-Tugma: Minimalizm (v7) */
+        .btn-minimal {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-minimal:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 2-Tugma: Takomillashgan (v10) */
+        .btn-advanced {
+            background: linear-gradient(135deg, #0A84FF, #5E5CE6);
+            color: #ffffff;
+            box-shadow: 0 10px 30px rgba(10, 132, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-advanced:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(10, 132, 255, 0.5);
+            background: linear-gradient(135deg, #1b8eff, #6b69eb);
+        }
+
+        .recommended-badge {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #FFD700;
+            color: #000000;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+            animation: pulseBadge 2s infinite;
+        }
+
+        @keyframes pulseBadge {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (min-width: 768px) {
+            .buttons-wrapper {
+                flex-direction: row;
+            }
+            .btn {
+                flex: 1;
+                padding: 30px 20px;
+            }
+            .recommended-badge {
+                top: -12px;
+                right: 50%;
+                transform: translateX(50%);
+                animation: pulseBadgeDesktop 2s infinite;
+            }
+            @keyframes pulseBadgeDesktop {
+                0% { transform: translateX(50%) scale(1); }
+                50% { transform: translateX(50%) scale(1.05); }
+                100% { transform: translateX(50%) scale(1); }
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>PRO EXAM Ultimate</h2>
-        <p>Platformamiz yangi va tezroq Netlify serveriga muvaffaqiyatli ko'chirildi.</p>
-        
-        <div class="loader"></div>
-        
-        <p>Siz avtomatik tarzda yo'naltirilyapsiz...</p>
-        
-        <a href="https://adhammuttestproextrain.netlify.app/" class="btn-manual">
-            O'tishni kutmaslik 🚀
-        </a>
-        
-        <p style="font-size: 0.85rem; color: #718096; margin-top: 20px;">
-            Yangi manzil: adhammuttestproextrain.netlify.app
+    <div class="gateway-container">
+        <h1>Yangi intellektual makonga xush kelibsiz!</h1>
+        <p class="welcome-text">
+            Bilim va intellektual yuksalish sari tashlangan har bir qadam yuksak e'tirofga munosibdir. Ushbu platforma sizning izlanishlaringizni qo'llab-quvvatlash, qulay va zamonaviy uslubda bilimlaringizni sinovdan o'tkazish maqsadida yaratildi. O'zingiz uchun eng maqbul bo'lgan muhitni tanlang va muvaffaqiyat sari yorqin yo'lni boshlang.
         </p>
+
+        <div class="buttons-wrapper">
+            <a href="https://adhammuttestproextrain.netlify.app/" class="btn btn-minimal">
+                <span class="btn-title">Birinchi platforma</span>
+                <span class="btn-subtitle">v7.5 - Minimalizm va soddalik</span>
+            </a>
+
+            <a href="https://adham610107-ctrl.github.io/newDEP/" class="btn btn-advanced">
+                <div class="recommended-badge">★ Tavsiya etiladi</div>
+                <span class="btn-title">Ikkinchi platforma</span>
+                <span class="btn-subtitle">v10 - Takomillashgan va ko'p funksiyali</span>
+            </a>
+        </div>
     </div>
 
-    <script>
-        setTimeout(function() {
-            window.location.replace("https://adhammuttestproextrain.netlify.app/");
-        }, 500);
-    </script>
 </body>
 </html>
